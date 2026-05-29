@@ -1,492 +1,426 @@
-// ================================================================
-// ServiceM8 Timesheet Proxy — Google Apps Script
-// Version: 3.0 — with edit/resubmit support via Google Sheets
-// ================================================================
-// SETUP:
-// 1. Replace YOUR_API_KEY_HERE with your ServiceM8 API key
-// 2. Replace YOUR_GOOGLE_SHEET_ID_HERE with your Google Sheet ID
-// ================================================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>Weekly Timesheet</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F4F0;--surface:#fff;--s2:#EFEFEB;--s3:#E6E4DE;--border:#E0DED8;--border2:#C8C6BE;--text:#1A1917;--t2:#6B6A65;--t3:#9E9C96;--blue:#1A56DB;--blue-bg:#EEF3FD;--blue-text:#1A3A8F;--green:#057A55;--gbg:#ECFDF5;--gtext:#03543F;--red:#C81E1E;--rbg:#FDF2F2;--r:10px;--rl:14px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.secure-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--green);background:var(--gbg);border:1px solid #A7F3D0;border-radius:20px;padding:3px 9px;white-space:nowrap}
+.page{max-width:560px;margin:0 auto;padding:14px 14px 80px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:11px;overflow:hidden}
+.card-hdr{padding:11px 15px;border-bottom:1px solid var(--border);background:var(--s2);display:flex;align-items:center;justify-content:space-between}
+.card-hdr-title{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.07em}
+.card-body{padding:13px 15px}
+label{font-size:12px;font-weight:500;color:var(--t2);display:block;margin-bottom:4px}
+input[type=text],input[type=date],input[type=time],input[type=number],textarea,select{width:100%;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;outline:none;-webkit-appearance:none;transition:border-color .15s}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.09)}
+textarea{resize:vertical;min-height:58px;line-height:1.5}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239E9C96' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+.btn{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;border-radius:var(--r);padding:9px 15px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .12s}
+.btn:hover{background:var(--s2)}.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--text);color:#fff;border-color:var(--text);font-size:15px;padding:13px 20px;width:100%;font-weight:600}
+.btn-primary:hover{background:#2D2C29}.btn-primary:disabled{opacity:.35;cursor:default;transform:none}
+.btn-outline-blue{background:var(--blue-bg);color:var(--blue-text);border-color:#B8CEFA;font-size:12px;padding:4px 10px;border-radius:20px}
+.btn-outline-blue:hover{background:#DCE8FD}
+.btn-load{background:var(--blue);color:#fff;border-color:var(--blue);width:100%;margin-top:4px}
+.btn-load:hover{background:#1446B8}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:var(--s2);border-radius:var(--r);padding:11px 13px}
+.stat-lbl{font-size:10px;color:var(--t3);margin-bottom:2px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.stat-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--text)}
+.stat-unit{font-size:12px;color:var(--t3)}
+.day-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:9px;transition:opacity .2s}
+.day-hdr{padding:10px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--s2);border-radius:var(--rl) var(--rl) 0 0}
+.day-meta{display:flex;align-items:center;gap:6px}
+.day-label{font-size:14px;font-weight:600}
+.day-date{font-size:12px;color:var(--t3);font-family:'DM Mono',monospace}
+.day-jobs-count{font-size:11px;background:var(--blue-bg);color:var(--blue-text);border-radius:20px;padding:2px 7px;font-weight:500}
+.nowork-btn{font-size:12px;font-family:'DM Sans',sans-serif;color:var(--t2);border:1px solid var(--border);border-radius:20px;padding:3px 11px;background:var(--surface);cursor:pointer}
+.nowork-btn:hover{border-color:var(--border2);color:var(--text)}
+.day-body{padding:11px 13px}
+.day-dimmed{opacity:.35}
+.job-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:11px 12px;margin-bottom:8px}
+.job-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.job-pill{font-size:11px;font-weight:600;font-family:'DM Mono',monospace;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3px 9px;color:var(--t2)}
+.job-pill.scheduled{background:var(--blue-bg);border-color:#B8CEFA;color:var(--blue-text)}
+.job-card-actions{display:flex;gap:6px;align-items:center}
+.rm-btn{background:none;border:none;cursor:pointer;color:var(--t3);font-size:20px;padding:0 4px;line-height:1;border-radius:6px}
+.rm-btn:hover{color:var(--red);background:var(--rbg)}
+.job-address{font-size:12px;color:var(--t2);margin-bottom:8px;padding:5px 8px;background:var(--surface);border-radius:6px;border:1px solid var(--border);display:flex;align-items:flex-start;gap:5px;line-height:1.4}
+.auto-banner{font-size:11px;color:var(--green);background:var(--gbg);border:1px solid #A7F3D0;border-radius:6px;padding:4px 9px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.loading-overlay{position:fixed;inset:0;background:rgba(245,244,240,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;gap:12px}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--t2);font-weight:500}
+.status{font-size:13px;text-align:center;padding:10px 0;font-weight:500;line-height:1.5}
+.ok{color:var(--green)}.err{color:var(--red)}.loading{color:var(--t2)}
+.result-card{background:var(--gbg);border:1px solid #A7F3D0;border-radius:var(--rl);padding:20px 16px;text-align:center;margin-bottom:11px}
+.result-title{font-size:16px;font-weight:600;color:var(--gtext);margin:10px 0 4px}
+.result-sub{font-size:13px;color:var(--green)}
+.result-rows{margin-top:12px;text-align:left}
+.result-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #A7F3D0;color:var(--gtext)}
+.result-row:last-child{border-bottom:none}
+.result-total{font-weight:600;border-top:2px solid #A7F3D0;margin-top:4px}
+.add-job-btn{width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:8px;border:1px dashed var(--border2);border-radius:var(--r);background:none;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:4px}
+.add-job-btn:hover{background:var(--s2);color:var(--text)}
+</style>
+</head>
+<body>
 
-var SM8_API_KEY = "smk-d68cc0-0901d71884d9cc58-9b756cb1a479a50d";
-var SHEET_ID    = "1F58uFQETzQwsxdjH2zuhMt9sF-UXeVk4_Cjrp7TouX4";
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Connecting to ServiceM8…</div>
+</div>
 
-// Allowed staff roles
-var ALLOWED_ROLES = [
-  "63fd7881-fe93-477c-9609-23b7fe97daab",
-  "a4d555f9-5bef-4976-87eb-23b7f384ff6b",
-  "ebf88fbe-e6e5-4ad0-bca4-23b7f36f587b",
-  "e814aa90-3a80-4c19-92e7-23b7f0c4f00b"
-];
+<div class="topbar">
+  <div class="topbar-title">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Weekly Timesheet
+  </div>
+  <div class="secure-badge">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Secure
+  </div>
+</div>
 
-// ----------------------------------------------------------------
-// ServiceM8 helpers
-// ----------------------------------------------------------------
-function sm8Get(endpoint) {
-  var res = UrlFetchApp.fetch("https://api.servicem8.com/api_1.0/" + endpoint, {
-    headers: { "X-API-Key": SM8_API_KEY, "Accept": "application/json" },
-    muteHttpExceptions: true
+<div class="page" id="main-page" style="display:none">
+
+  <div class="card">
+    <div class="card-hdr"><span class="card-hdr-title">Who are you?</span></div>
+    <div class="card-body">
+      <div class="g2">
+        <div>
+          <label for="staff-select">Your name</label>
+          <select id="staff-select">
+            <option value="">Select your name…</option>
+          </select>
+        </div>
+        <div>
+          <label for="week-ending">Week ending</label>
+          <input type="date" id="week-ending"/>
+        </div>
+      </div>
+      <button class="btn btn-load" id="load-btn" onclick="loadSchedule()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 0-.49-4.49"/></svg>
+        Load my schedule
+      </button>
+      <div class="status" id="load-status"></div>
+    </div>
+  </div>
+
+  <div class="card" id="summary-card" style="display:none">
+    <div class="card-hdr"><span class="card-hdr-title">Weekly summary</span></div>
+    <div class="card-body">
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-lbl">Net hours</div><div class="stat-val" id="s-hours">0.0</div></div>
+        <div class="stat"><div class="stat-lbl">Jobs</div><div class="stat-val" id="s-jobs">0</div></div>
+        <div class="stat"><div class="stat-lbl">Travel</div><div class="stat-val" id="s-travel">0<span class="stat-unit"> min</span></div></div>
+        <div class="stat"><div class="stat-lbl">Breaks</div><div class="stat-val" id="s-break">0<span class="stat-unit"> min</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="days-container"></div>
+
+  <div id="submit-section" style="display:none">
+    <button class="btn btn-primary" id="submit-btn" onclick="submitTimesheet()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Submit to ServiceM8
+    </button>
+    <div class="status" id="status-msg"></div>
+  </div>
+
+</div>
+
+<script>
+// ── ONLY LINE YOU NEED TO CHANGE ────────────────────────────────
+var PROXY_URL = "https://script.google.com/macros/s/AKfycbyFdNC4h5dBwgIpJ0nJkZfxn2FaNc0irNMMHERwdz8oNYKQHkLkqaTQ1UEoUIgOTovMeQ/exec";
+// ───────────────────────────────────────────────────────────────
+
+var DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+var jobCounters = {};
+var currentSchedule = [];
+
+window.addEventListener('DOMContentLoaded', function() {
+  setDefaultWeek();
+  loadStaff();
+});
+
+function setDefaultWeek() {
+  var today = new Date();
+  var fri = new Date(today);
+  fri.setDate(today.getDate() + (5 - today.getDay() + 7) % 7);
+  document.getElementById('week-ending').value = fri.toISOString().split('T')[0];
+}
+
+function showLoading(msg) {
+  document.getElementById('loading-text').textContent = msg || "Loading…";
+  document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
+function showPage()    { document.getElementById('main-page').style.display = ''; }
+
+// All data fetching goes through the proxy — browser never contacts ServiceM8 directly
+async function proxyGet(action, params) {
+  var url = PROXY_URL + "?action=" + encodeURIComponent(action);
+  if (params) Object.keys(params).forEach(function(k) { url += "&" + encodeURIComponent(k) + "=" + encodeURIComponent(params[k]); });
+  var res = await fetch(url);
+  return res.json();
+}
+
+async function proxyPost(payload) {
+  var res = await fetch(PROXY_URL, { 
+    method: 'POST', 
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+    body: JSON.stringify(payload) 
   });
-  if (res.getResponseCode() !== 200) throw new Error("SM8 " + res.getResponseCode() + ": " + res.getContentText().slice(0, 120));
-  return JSON.parse(res.getContentText());
+  return res.json();
 }
 
-function sm8Post(endpoint, payload) {
-  var res = UrlFetchApp.fetch("https://api.servicem8.com/api_1.0/" + endpoint, {
-    method: "post",
-    contentType: "application/json",
-    headers: { "X-API-Key": SM8_API_KEY },
-    payload: JSON.stringify(payload),
-    muteHttpExceptions: true
-  });
-  return { code: res.getResponseCode(), body: res.getContentText() };
-}
-
-function sm8Delete(endpoint) {
-  var res = UrlFetchApp.fetch("https://api.servicem8.com/api_1.0/" + endpoint, {
-    method: "post",
-    contentType: "application/json",
-    headers: { "X-API-Key": SM8_API_KEY },
-    payload: JSON.stringify({ active: 0 }),
-    muteHttpExceptions: true
-  });
-  return res.getResponseCode();
-}
-
-function jsonOut(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
-}
-
-// ----------------------------------------------------------------
-// Google Sheet helpers
-// ----------------------------------------------------------------
-function getSpreadsheet() {
-  return SpreadsheetApp.openById(SHEET_ID);
-}
-
-function getOrCreateSheet(name, headers) {
-  var ss    = getSpreadsheet();
-  var sheet = ss.getSheetByName(name);
-  if (!sheet) {
-    sheet = ss.insertSheet(name);
-    sheet.appendRow(headers);
-    var headerRange = sheet.getRange(1, 1, 1, headers.length);
-    headerRange.setBackground("#1A1917");
-    headerRange.setFontColor("#FFFFFF");
-    headerRange.setFontWeight("bold");
-    sheet.setFrozenRows(1);
-  }
-  return sheet;
-}
-
-// Save full submission JSON keyed by staff_uuid + week_ending
-function saveSubmission(staffUuid, weekEnding, staffName, data) {
-  var sheet   = getOrCreateSheet("Submissions", ["Key","Staff UUID","Staff Name","Week Ending","Submitted At","Data JSON"]);
-  var key     = staffUuid + "_" + weekEnding;
-  var allData = sheet.getDataRange().getValues();
-  var now     = new Date().toLocaleString("en-AU");
-  var found   = false;
-
-  for (var i = 1; i < allData.length; i++) {
-    if (allData[i][0] === key) {
-      sheet.getRange(i + 1, 1, 1, 6).setValues([[key, staffUuid, staffName, weekEnding, now, JSON.stringify(data)]]);
-      found = true;
-      break;
+async function loadStaff() {
+  showLoading("Connecting to ServiceM8…");
+  try {
+    if (!PROXY_URL || PROXY_URL === "https://script.google.com/macros/s/AKfycbxBomLeLtJEcf1T4rfiSoqIQUANJ_xLFH1zntyw1Sdtm_U7n6M5Lz5QQbsKZaM_-eS-cg/exec") {
+      hideLoading(); showPage();
+      setStatus('load-status', "Form is not configured yet — please contact your manager.", 'err');
+      return;
     }
-  }
-
-  if (!found) {
-    sheet.appendRow([key, staffUuid, staffName, weekEnding, now, JSON.stringify(data)]);
-  }
-}
-
-// Load previous submission if it exists
-function loadSubmission(staffUuid, weekEnding) {
-  var ss    = getSpreadsheet();
-  var sheet = ss.getSheetByName("Submissions");
-  if (!sheet) return null;
-  var key     = staffUuid + "_" + weekEnding;
-  var allData = sheet.getDataRange().getValues();
-  for (var i = 1; i < allData.length; i++) {
-    if (allData[i][0] === key) {
-      try { return JSON.parse(allData[i][5]); } catch(e) { return null; }
-    }
-  }
-  return null;
-}
-
-// Write to All Timesheets tab
-function appendToTimesheetLog(data, weekEnding, staffName) {
-  var headers = [
-    "Week Ending","Staff Name","Day","Date","Job Number",
-    "Start","Finish","Travel (min)","Break (min)","Net Hours","Job Notes"
-  ];
-  var sheet = getOrCreateSheet("All Timesheets", headers);
-
-  // Remove existing rows for this staff + week
-  var allData = sheet.getDataRange().getValues();
-  for (var i = allData.length - 1; i >= 1; i--) {
-    if (allData[i][0] === weekEnding && allData[i][1] === staffName) {
-      sheet.deleteRow(i + 1);
-    }
-  }
-
-  // Add fresh rows
-  var rows = [];
-  data.days.forEach(function(day) {
-    if (day.no_work || !day.jobs || day.jobs.length === 0) return;
-    day.jobs.forEach(function(job) {
-      if (!job.start_time && !job.job_number) return;
-      rows.push([
-        weekEnding, staffName, day.day, day.date || "",
-        job.job_number || "", job.start_time || "", job.finish_time || "",
-        job.travel_minutes || 0, job.break_minutes || 0,
-        job.net_hours || 0, job.notes || ""
-      ]);
+    var data = await proxyGet("staff");
+    if (!data.success) throw new Error(data.message || "Could not load staff list");
+    var sel = document.getElementById('staff-select');
+    data.staff.forEach(function(s) {
+      var opt = document.createElement('option');
+      opt.value = s.uuid; opt.textContent = s.name;
+      sel.appendChild(opt);
     });
-  });
-
-  if (rows.length > 0) {
-    sheet.insertRowsAfter(1, rows.length);
-    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+    hideLoading(); showPage();
+  } catch(e) {
+    hideLoading(); showPage();
+    setStatus('load-status', "Could not connect. Check your internet and try again. (" + e.message + ")", 'err');
   }
-
-  // Update weekly totals
-  updateWeeklyTotals(data, weekEnding, staffName);
 }
 
-function updateWeeklyTotals(data, weekEnding, staffName) {
-  var headers = [
-    "Week Ending","Staff Name",
-    "Mon","Tue","Wed","Thu","Fri","Sat","Sun",
-    "Total Hours","Total Travel (min)","Total Break (min)","Jobs"
-  ];
-  var sheet = getOrCreateSheet("Weekly Totals", headers);
-  var DAYS  = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-  var COLS  = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-
-  var dayHours  = { "Monday":0,"Tuesday":0,"Wednesday":0,"Thursday":0,"Friday":0,"Saturday":0,"Sunday":0 };
-  var totalHours = 0, totalTravel = 0, totalBreak = 0, jobCount = 0;
-
-  data.days.forEach(function(day) {
-    if (day.no_work || !day.jobs) return;
-    day.jobs.forEach(function(job) {
-      if (!job.start_time && !job.job_number) return;
-      var h = parseFloat(job.net_hours) || 0;
-      if (dayHours.hasOwnProperty(day.day)) {
-        dayHours[day.day] += h;
-      }
-      totalHours  += h;
-      totalTravel += parseInt(job.travel_minutes) || 0;
-      totalBreak  += parseInt(job.break_minutes)  || 0;
-      jobCount++;
-    });
-  });
-
-  // Find existing row for this staff + week or create new one
-  var allData  = sheet.getDataRange().getValues();
-  var existRow = -1;
-  for (var i = 1; i < allData.length; i++) {
-    if (String(allData[i][0]) === String(weekEnding) && 
-        String(allData[i][1]) === String(staffName)) {
-      existRow = i + 1; break;
-    }
+async function loadSchedule() {
+  var staffUuid  = document.getElementById('staff-select').value;
+  var weekEnding = document.getElementById('week-ending').value;
+  if (!staffUuid)  { setStatus('load-status', "Please select your name first.", 'err'); return; }
+  if (!weekEnding) { setStatus('load-status', "Please select a week ending date.", 'err'); return; }
+  showLoading("Loading your jobs from ServiceM8…");
+  try {
+    var data = await proxyGet("schedule", { staff_uuid: staffUuid, week_ending: weekEnding });
+    if (!data.success) throw new Error(data.message || "Could not load schedule");
+    currentSchedule = data.schedule;
+    buildDays(currentSchedule);
+    document.getElementById('summary-card').style.display  = '';
+    document.getElementById('submit-section').style.display = '';
+    setStatus('load-status', "Schedule loaded — confirm your hours below and submit.", 'ok');
+    updateSummary();
+  } catch(e) {
+    setStatus('load-status', "Could not load schedule: " + e.message, 'err');
   }
+  hideLoading();
+}
 
-  var row = [
-    weekEnding,
-    staffName,
-    dayHours["Monday"],
-    dayHours["Tuesday"],
-    dayHours["Wednesday"],
-    dayHours["Thursday"],
-    dayHours["Friday"],
-    dayHours["Saturday"],
-    dayHours["Sunday"],
-    parseFloat(totalHours.toFixed(2)),
-    totalTravel,
-    totalBreak,
-    jobCount
-  ];
+function setStatus(id, msg, type) {
+  var el = document.getElementById(id);
+  el.textContent = msg; el.className = 'status ' + (type || '');
+}
 
-  if (existRow > 0) {
-    sheet.getRange(existRow, 1, 1, headers.length).setValues([row]);
+function buildDays(schedule) {
+  var c = document.getElementById('days-container'); c.innerHTML = '';
+  jobCounters = {};
+  schedule.forEach(function(dayData) {
+    var day = dayData.day;
+    jobCounters[day] = 1;
+    var hasJobs = dayData.jobs && dayData.jobs.length > 0;
+    var block = document.createElement('div');
+    block.className = 'day-block'; block.id = 'day-' + day;
+    block.innerHTML =
+      '<div class="day-hdr">' +
+        '<div class="day-meta">' +
+          '<span class="day-label">' + day + '</span>' +
+          '<span class="day-date">' + (dayData.date || '') + '</span>' +
+          (hasJobs ? '<span class="day-jobs-count">' + dayData.jobs.length + ' job' + (dayData.jobs.length > 1 ? 's' : '') + '</span>' : '') +
+        '</div>' +
+        '<button class="nowork-btn" id="nwbtn-' + day + '" onclick="toggleNoWork(\'' + day + '\')">No work</button>' +
+      '</div>' +
+      '<div class="day-body" id="dbody-' + day + '">' +
+        '<div id="djobs-' + day + '"></div>' +
+        '<button class="add-job-btn" onclick="addJobCard(\'' + day + '\', null, false)">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+          'Add unscheduled job' +
+        '</button>' +
+      '</div>';
+    c.appendChild(block);
+    if (hasJobs) {
+      dayData.jobs.forEach(function(job) { addJobCard(day, job, true); });
+    }
+  });
+}
+
+function addJobCard(day, jobData, isScheduled) {
+  var c   = document.getElementById('djobs-' + day);
+  var idx = jobCounters[day]++;
+  var jid = day + '-' + idx;
+  var uuid   = jobData ? (jobData.job_uuid        || '') : '';
+  var num    = jobData ? (jobData.job_number       || '') : '';
+  var addr   = jobData ? (jobData.job_address      || jobData.contact_name || '') : '';
+  var startT = jobData ? (jobData.scheduled_start  || '') : '';
+  var endT   = jobData ? (jobData.scheduled_end    || '') : '';
+  var div = document.createElement('div');
+  div.className = 'job-card'; div.id = 'jcard-' + jid;
+  div.innerHTML =
+    '<div class="job-card-top">' +
+      '<span class="job-pill' + (isScheduled ? ' scheduled' : '') + '">' +
+        (isScheduled ? '⚡ ' : '') + 'Job ' + idx + (num ? ' · ' + num : '') +
+      '</span>' +
+      '<div class="job-card-actions">' +
+        (uuid ? '<button class="btn btn-outline-blue" onclick="openInSM8(\'' + uuid + '\')" style="font-size:11px;padding:3px 9px">Open in SM8</button>' : '') +
+        '<button class="rm-btn" onclick="removeJob(\'' + jid + '\')">&times;</button>' +
+      '</div>' +
+    '</div>' +
+    (isScheduled ? '<div class="auto-banner"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Auto-filled from ServiceM8</div>' : '') +
+    (addr ? '<div class="job-address"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + addr + '</div>' : '') +
+   '<input type="hidden" id="juuid-' + jid + '" value="' + uuid + '"/>' +
+(!isScheduled ? '<div class="g1"><label>Job number</label><input type="text" id="jnum-' + jid + '" placeholder="Enter job number" onchange="updateSummary()"/></div>' : '<input type="hidden" id="jnum-' + jid + '" value="' + num + '"/>') +
+      '<div><label>Start time</label><input type="time" id="jstart-'  + jid + '" value="' + startT + '" onchange="updateSummary()"/></div>' +
+      '<div><label>Finish time</label><input type="time" id="jfinish-' + jid + '" value="' + endT   + '" onchange="updateSummary()"/></div>' +
+    '</div>' +
+    '<div class="g2">' +
+      '<div><label>Travel (min)</label><input type="number" min="0" step="5" placeholder="0" id="jtravel-' + jid + '" onchange="updateSummary()"/></div>' +
+      '<div><label>Break (min)</label><input type="number"  min="0" step="5" placeholder="0" id="jbreak-'  + jid + '" onchange="updateSummary()"/></div>' +
+    '</div>' +
+    '<div><label>Job notes</label><textarea id="jnotes-' + jid + '" placeholder="Work completed, materials used, issues…"></textarea></div>';
+  c.appendChild(div);
+  updateSummary();
+}
+
+function toggleNoWork(day) {
+  var body  = document.getElementById('dbody-'  + day);
+  var btn   = document.getElementById('nwbtn-'  + day);
+  var block = document.getElementById('day-'    + day);
+  if (body.style.display === 'none') {
+    body.style.display = ''; btn.textContent = 'No work'; block.classList.remove('day-dimmed');
   } else {
-    sheet.insertRowAfter(1);
-    sheet.getRange(2, 1, 1, headers.length).setValues([row]);
+    body.style.display = 'none'; btn.textContent = 'Undo'; block.classList.add('day-dimmed');
   }
+  updateSummary();
 }
 
-// ----------------------------------------------------------------
-// Delete previous ServiceM8 entries for this staff + week
-// ----------------------------------------------------------------
-function deletePreviousEntries(staffUuid, weekEnding) {
-  // Work out Monday to Sunday of the week
-  var friday = new Date(weekEnding + "T00:00:00");
-  var monday = new Date(friday); monday.setDate(friday.getDate() - 4);
-  var sunday = new Date(friday); sunday.setDate(friday.getDate() + 2);
+function removeJob(jid) { var el = document.getElementById('jcard-' + jid); if (el) el.remove(); updateSummary(); }
 
-  // Fetch all activities for this staff member
-  var activities = sm8Get("jobactivity.json");
-  activities.forEach(function(act) {
-    if (act.staff_uuid !== staffUuid) return;
-    if (!act.start_date) return;
-    var actDate = new Date(act.start_date.slice(0, 10) + "T00:00:00");
-    if (actDate >= monday && actDate <= sunday && act.active == 1) {
-      sm8Delete("jobactivity/" + act.uuid + ".json");
-    }
-  });
-
-  // Fetch all notes and delete timesheet ones for jobs worked this week
-  // (We tag our notes with === TIMESHEET ENTRY === so we can identify them)
-  var notes = sm8Get("note.json");
-  notes.forEach(function(note) {
-    if (!note.note) return;
-    if (note.note.indexOf("=== TIMESHEET ENTRY ===") === -1) return;
-    if (note.note.indexOf("Staff: ") === -1) return;
-    // Check it belongs to this staff member
-    if (note.note.indexOf(staffUuid) !== -1 || note.active == 1) {
-      var editDate = new Date((note.edit_date || "").slice(0, 10) + "T00:00:00");
-      // Only delete notes created in the relevant week date range
-      if (note.note.indexOf(weekEnding) !== -1 || (editDate >= monday && editDate <= sunday)) {
-        sm8Delete("note/" + note.uuid + ".json");
-      }
-    }
-  });
+function openInSM8(uuid) {
+  if (!uuid) return;
+  window.location.href = 'servicem8://job/' + uuid;
+  setTimeout(function() { window.open('https://go.servicem8.com/job/' + uuid, '_blank'); }, 400);
 }
 
-// ----------------------------------------------------------------
-// GET handler
-// ----------------------------------------------------------------
-function doGet(e) {
-  try {
-    var action = e && e.parameter && e.parameter.action;
-
-    // Return staff list
-    if (action === "staff") {
-      var staff = sm8Get("staff.json").filter(function(s) {
-        return s.active == 1 && ALLOWED_ROLES.indexOf(s.security_role_uuid) !== -1;
-      }).map(function(s) {
-        return { uuid: s.uuid, name: (s.first + " " + s.last).trim() };
-      }).sort(function(a, b) { return a.name.localeCompare(b.name); });
-      return jsonOut({ success: true, staff: staff });
-    }
-
-   // Return schedule — checks for previous submission first
-    if (action === "schedule") {
-      var staffUuid  = e.parameter.staff_uuid;
-      var weekEnding = e.parameter.week_ending;
-      if (!staffUuid || !weekEnding) return jsonOut({ success: false, message: "Missing parameters" });
-
-      // Check if previous submission exists in Google Sheet
-      var previous = loadSubmission(staffUuid, weekEnding);
-      if (previous) {
-        return jsonOut({ success: true, schedule: previous.data.days, is_edit: true });
-      }
-
-      // No previous submission — return empty days for staff to fill in
-      var friday = new Date(weekEnding + "T00:00:00");
-      var monday = new Date(friday); monday.setDate(friday.getDate() - 4);
-      var DAYS   = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-
-      var result = DAYS.map(function(day, i) {
-        var d = new Date(monday); d.setDate(monday.getDate() + i);
-        var dateStr = d.toLocaleDateString("en-AU", { day: "2-digit", month: "2-digit" });
-        return { day: day, date: dateStr, jobs: [] };
-      });
-
-      return jsonOut({ success: true, schedule: result, is_edit: false });
-    }
-
-    return jsonOut({ success: true, status: "Timesheet proxy is running." });
-
-  } catch(err) {
-    return jsonOut({ success: false, message: err.message });
-  }
+function timeDiff(s, f) {
+  if (!s || !f) return 0;
+  var sh=+s.split(':')[0], sm=+s.split(':')[1], fh=+f.split(':')[0], fm=+f.split(':')[1];
+  var m=(fh*60+fm)-(sh*60+sm); if(m<0)m+=1440; return m;
 }
-// ----------------------------------------------------------------
-// POST handler
-// ----------------------------------------------------------------
-function doPost(e) {
-  try {
-    var data          = JSON.parse(e.postData.contents);
-    var staffName     = data.staff_name  || "Unknown";
-    var staffUuid     = data.staff_uuid  || "";
-    var weekEnding    = data.week_ending || "";
-    var days          = data.days        || [];
-    var isEdit        = data.is_edit     || false;
-    var submitted     = [];
-    var errors        = [];
-    var createdActivities = [];
-    var createdNotes      = [];
 
-    // If editing — delete only the exact entries we created previously
-    if (isEdit) {
-      try {
-        var prev = loadSubmission(staffUuid, weekEnding);
-        if (prev) deletePreviousEntries(prev.activityUuids, prev.noteUuids);
-      } catch(delErr) {
-        errors.push("Cleanup warning: " + delErr.message);
-      }
-    }
-
-    var DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-
-    for (var i = 0; i < days.length; i++) {
-      var day = days[i];
-      if (day.no_work || !day.jobs || day.jobs.length === 0) continue;
-
-      for (var j = 0; j < day.jobs.length; j++) {
-        var job = day.jobs[j];
-        if (!job.job_uuid || job.job_uuid.length < 10) continue;
-
-        // Work out actual date for this day
-        var friday   = new Date(weekEnding + "T00:00:00");
-        var dayIndex = DAYS.indexOf(day.day);
-        var jobDate  = new Date(friday);
-        jobDate.setDate(friday.getDate() - (4 - dayIndex));
-        var dateStr  = jobDate.getFullYear() + "-" +
-          String(jobDate.getMonth() + 1).padStart(2, "0") + "-" +
-          String(jobDate.getDate()).padStart(2, "0");
-
-        var startDateTime = dateStr + " " + (job.start_time  || "08:00") + ":00";
-        var endDateTime   = dateStr + " " + (job.finish_time || "08:00") + ":00";
-
-        // 1. Post job activity
-        var actResult = sm8Post("jobactivity.json", {
-          job_uuid:               job.job_uuid,
-          staff_uuid:             staffUuid,
-          start_date:             startDateTime,
-          end_date:               endDateTime,
-          activity_was_recorded:  "1",
-          activity_was_scheduled: "0",
-          travel_time_in_seconds: (job.travel_minutes || 0) * 60,
-          active:                 1
-        });
-
-        if (actResult.code === 200 || actResult.code === 201) {
-          submitted.push("Job " + (job.job_number || job.job_uuid.slice(0, 8)) + " on " + day.day);
-          try {
-            var actBody = JSON.parse(actResult.body);
-            if (actBody.uuid) createdActivities.push(actBody.uuid);
-          } catch(e) {}
-        } else {
-          errors.push("Job " + (job.job_number || "?") + ": " + actResult.body.slice(0, 100));
-          continue;
-        }
-
-        // 2. Post job diary note
-        var noteLines = [
-          "=== TIMESHEET ENTRY ===",
-          "Staff: "     + staffName,
-          "Week: "      + weekEnding,
-          "Date: "      + day.day + " " + (day.date || dateStr),
-          "Start: "     + (job.start_time    || "—"),
-          "Finish: "    + (job.finish_time   || "—"),
-          "Travel: "    + (job.travel_minutes || 0) + " min",
-          "Break: "     + (job.break_minutes  || 0) + " min",
-          "Net hours: " + (job.net_hours      || 0).toFixed(2) + " hrs",
-          job.notes ? "Job notes: " + job.notes : ""
-        ].filter(function(s) { return s !== ""; }).join("\n");
-
-        var noteResult = sm8Post("note.json", {
-          related_object:      "job",
-          related_object_uuid: job.job_uuid,
-          note:                noteLines,
-          active:              1
-        });
-        try {
-          var noteBody = JSON.parse(noteResult.body);
-          if (noteBody.uuid) createdNotes.push(noteBody.uuid);
-        } catch(e) {}
-      }
-    }
-
-    // 3. Save to Google Sheet
-    try {
-      saveSubmission(staffUuid, weekEnding, staffName, data, { activities: createdActivities, notes: createdNotes });
-      appendToTimesheetLog(data, weekEnding, staffName);
-    } catch(sheetErr) {
-      errors.push("Sheet error: " + sheetErr.message);
-    }
-
-    return jsonOut({
-      success:   errors.length === 0,
-      submitted: submitted,
-      errors:    errors,
-      message:   submitted.length + " job(s) submitted to ServiceM8."
+function updateSummary() {
+  var totMins=0, totTravel=0, totBreak=0, totJobs=0;
+  DAYS.forEach(function(day) {
+    var body = document.getElementById('dbody-' + day);
+    if (!body || body.style.display === 'none') return;
+    var cards = document.getElementById('djobs-' + day);
+    if (!cards) return;
+    cards.querySelectorAll('.job-card').forEach(function(card) {
+      var jid    = card.id.replace('jcard-', '');
+      var start  = (document.getElementById('jstart-'  + jid)||{}).value||'';
+      var finish = (document.getElementById('jfinish-' + jid)||{}).value||'';
+      var travel = parseInt((document.getElementById('jtravel-' + jid)||{}).value)||0;
+      var brk    = parseInt((document.getElementById('jbreak-'  + jid)||{}).value)||0;
+      totJobs++; totMins+=timeDiff(start,finish); totTravel+=travel; totBreak+=brk;
     });
-
-  } catch(err) {
-    return jsonOut({ success: false, message: "Server error: " + err.message });
-  }
-}
-
-// ----------------------------------------------------------------
-// Test functions — safe to leave in
-// ----------------------------------------------------------------
-function testRoles() {
-  var result = sm8Get("securityrole.json");
-  for (var i = 0; i < result.length; i++) {
-    Logger.log(result[i].name + " = " + result[i].uuid);
-  }
-}
-
-function findStaff() {
-  var staff = sm8Get("staff.json");
-  for (var i = 0; i < staff.length; i++) {
-    Logger.log(staff[i].first + " " + staff[i].last + " = " + staff[i].uuid);
-  }
-}
-function testSheet() {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
-  Logger.log(ss.getName());
-}
-
-
-function testFullWrite() {
-  var testData = {
-    days: [
-      {
-        day: "Monday",
-        date: "26/05",
-        no_work: false,
-        jobs: [
-          {
-            job_uuid: "1490c6f5-e001-48d8-a723-2435bf921d1d",
-            job_number: "WE/419",
-            start_time: "08:00",
-            finish_time: "16:00",
-            travel_minutes: 20,
-            break_minutes: 30,
-            net_hours: 7.5,
-            notes: "Test note"
-          }
-        ]
-      }
-    ]
-  };
-  
-  try {
-    saveSubmission(
-      "87ae45d3-7e38-4623-b885-23b7fd25514b",
-      "2026-05-30",
-      "Jonelle Ede",
-      testData,
-      { activities: ["test-act-uuid"], notes: ["test-note-uuid"] }
-    );
-    Logger.log("saveSubmission worked");
-    
-    appendToTimesheetLog(testData, "2026-05-30", "Jonelle Ede");
-    Logger.log("appendToTimesheetLog worked");
-    
-  } catch(err) {
-    Logger.log("ERROR: " + err.message);
-  }
-}function checkAllActivities() {
-  var activities = sm8Get("jobactivity.json");
-  var active = activities.filter(function(a) { return a.active == 1; });
-  Logger.log("Total active activities: " + active.length);
-  active.forEach(function(a) {
-    Logger.log(a.start_date + " | staff: " + a.staff_uuid + " | job: " + a.job_uuid);
   });
+  var net = Math.max(0,(totMins-totBreak)/60);
+  document.getElementById('s-hours').textContent  = net.toFixed(1);
+  document.getElementById('s-jobs').textContent   = totJobs;
+  document.getElementById('s-travel').innerHTML   = totTravel+'<span class="stat-unit"> min</span>';
+  document.getElementById('s-break').innerHTML    = totBreak +'<span class="stat-unit"> min</span>';
 }
+
+function buildPayload() {
+  var staffSel   = document.getElementById('staff-select');
+  var staffUuid  = staffSel.value;
+  var staffName  = staffSel.options[staffSel.selectedIndex] ? staffSel.options[staffSel.selectedIndex].textContent : '';
+  var weekEnding = document.getElementById('week-ending').value;
+  var days = currentSchedule.map(function(dayData) {
+    var day  = dayData.day;
+    var body = document.getElementById('dbody-' + day);
+    if (!body || body.style.display === 'none') return { day:day, date:dayData.date, no_work:true, jobs:[] };
+    var jobs = [];
+    var cards = document.getElementById('djobs-' + day);
+    if (cards) cards.querySelectorAll('.job-card').forEach(function(card) {
+      var jid    = card.id.replace('jcard-','');
+      var uuid   = (document.getElementById('juuid-'   + jid)||{}).value||'';
+      var num    = (document.getElementById('jnum-'    + jid)||{}).value||'';
+      var start  = (document.getElementById('jstart-'  + jid)||{}).value||'';
+      var finish = (document.getElementById('jfinish-' + jid)||{}).value||'';
+      var travel = parseInt((document.getElementById('jtravel-' + jid)||{}).value)||0;
+      var brk    = parseInt((document.getElementById('jbreak-'  + jid)||{}).value)||0;
+      var notes  = (document.getElementById('jnotes-'  + jid)||{}).value||'';
+      var netH   = Math.max(0,(timeDiff(start,finish)-brk)/60);
+      jobs.push({job_uuid:uuid,job_number:num,start_time:start,finish_time:finish,travel_minutes:travel,break_minutes:brk,net_hours:parseFloat(netH.toFixed(2)),notes:notes});
+    });
+    return { day:day, date:dayData.date, no_work:false, jobs:jobs };
+  });
+  return { staff_name:staffName, staff_uuid:staffUuid, week_ending:weekEnding, submitted_at:new Date().toISOString(), days:days };
+}
+
+async function submitTimesheet() {
+  var staffUuid  = document.getElementById('staff-select').value;
+  var weekEnding = document.getElementById('week-ending').value;
+  var btn = document.getElementById('submit-btn');
+  if (!staffUuid)           { setStatus('status-msg','Please select your name.','err'); return; }
+  if (!weekEnding)          { setStatus('status-msg','Please select a week ending date.','err'); return; }
+  if (!currentSchedule.length) { setStatus('status-msg','Please load your schedule first.','err'); return; }
+  var payload = buildPayload();
+  btn.disabled = true;
+  setStatus('status-msg','Submitting to ServiceM8…','loading');
+  try {
+    var result = await proxyPost(payload);
+    if (result.success) { showSuccess(payload); }
+    else { setStatus('status-msg','Some jobs could not be submitted: ' + (result.errors||[]).join(', '),'err'); }
+  } catch(e) {
+    setStatus('status-msg','Could not reach the server. Check your internet and try again.','err');
+  }
+  btn.disabled = false;
+}
+
+function showSuccess(payload) {
+  var section = document.getElementById('submit-section');
+  var allJobs = [];
+  payload.days.forEach(function(d){ if(d.jobs) d.jobs.forEach(function(j){ allJobs.push({day:d.day,job:j}); }); });
+  var totalH  = allJobs.reduce(function(s,j){ return s+(j.job.net_hours||0); },0);
+  var dateStr = new Date(payload.week_ending+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'});
+  section.innerHTML =
+    '<div class="result-card">' +
+      '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#057A55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+      '<div class="result-title">Submitted to ServiceM8 ✓</div>' +
+      '<div class="result-sub">' + payload.staff_name + ' — week ending ' + dateStr + '</div>' +
+      '<div class="result-rows">' +
+        '<div style="font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px">Jobs submitted</div>' +
+        allJobs.map(function(j){ return '<div class="result-row"><span>'+j.day+' — '+(j.job.job_number?'Job '+j.job.job_number:'Unscheduled')+'</span><span>'+(j.job.net_hours||0).toFixed(2)+' hrs</span></div>'; }).join('') +
+        '<div class="result-row result-total"><span>Total</span><span>'+totalH.toFixed(2)+' hrs</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<button class="btn" style="width:100%;justify-content:center" onclick="location.reload()">' +
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.1"/></svg>' +
+      'Start new timesheet' +
+    '</button>';
+}
+</script>
+</body>
+</html>
