@@ -156,11 +156,21 @@ window.addEventListener('DOMContentLoaded', function() {
 
 function setDefaultWeek() {
   var today = new Date();
-  var fri = new Date(today);
-  fri.setDate(today.getDate() + (5 - today.getDay() + 7) % 7);
-  document.getElementById('week-ending').value = fri.toISOString().split('T')[0];
+  var day   = today.getDay();
+  var daysUntilFri;
+  if (day === 6) {
+    daysUntilFri = 6;
+  } else {
+    daysUntilFri = 5 - day;
+    if (daysUntilFri <= 0) daysUntilFri += 7;
+  }
+  var fri  = new Date(today);
+  fri.setDate(today.getDate() + daysUntilFri);
+  var yyyy = fri.getFullYear();
+  var mm   = String(fri.getMonth() + 1).padStart(2, '0');
+  var dd   = String(fri.getDate()).padStart(2, '0');
+  document.getElementById('week-ending').value = yyyy + '-' + mm + '-' + dd;
 }
-
 function showLoading(msg) {
   document.getElementById('loading-text').textContent = msg || "Loading…";
   document.getElementById('loading-overlay').style.display = 'flex';
