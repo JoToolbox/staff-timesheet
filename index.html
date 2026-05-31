@@ -424,6 +424,31 @@ function showSuccess(payload) {
       'Start new timesheet' +
     '</button>';
 }
+
+async function lookupJob(jid) {
+  var input  = document.getElementById('jnum-' + jid);
+  var status = document.getElementById('jlookup-' + jid);
+  var num    = (input.value || '').trim();
+  if (!num) { status.textContent = 'Please enter a job number first.'; status.style.color = 'var(--red)'; return; }
+  status.textContent = 'Looking up job\u2026';
+  status.style.color = 'var(--t2)';
+  try {
+    var data = await proxyGet("lookupjob", { job_number: num });
+    if (data.success) {
+      document.getElementById('juuid-' + jid).value = data.job_uuid;
+      input.value = data.job_number;
+      status.textContent = '\u2713 ' + (data.job_address || data.contact || data.job_number);
+      status.style.color = 'var(--green)';
+      updateSummary();
+    } else {
+      status.textContent = 'Job not found \u2014 check the number and try again.';
+      status.style.color = 'var(--red)';
+    }
+  } catch(e) {
+    status.textContent = 'Could not look up job.';
+    status.style.color = 'var(--red)';
+  }
+}
 </script>
 </body>
 </html>
