@@ -292,7 +292,7 @@ function addJobCard(day, jobData, isScheduled) {
     (isScheduled ? '<div class="auto-banner"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Auto-filled from ServiceM8</div>' : '') +
     (addr ? '<div class="job-address"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + addr + '</div>' : '') +
    '<input type="hidden" id="juuid-' + jid + '" value="' + uuid + '"/>' +
-(!isScheduled ? '<div class="g1"><label>Job number</label><input type="text" id="jnum-' + jid + '" placeholder="Enter job number" onchange="updateSummary()"/></div>' : '<input type="hidden" id="jnum-' + jid + '" value="' + num + '"/>') +
+(!isScheduled ? '<div class="g1"><label>Job number</label><div style="display:flex;gap:6px"><input type="text" id="jnum-' + jid + '" placeholder="e.g. 413 or WW/413" onchange="updateSummary()"/><button class="btn btn-outline-blue" style="white-space:nowrap;flex-shrink:0" onclick="lookupJob(\'' + jid + '\')">Find job</button></div><div id="jlookup-' + jid + '" style="font-size:12px;margin-top:4px"></div></div>' : '<input type="hidden" id="jnum-' + jid + '" value="' + num + '"/>') +
       '<div><label>Start time</label><input type="time" id="jstart-'  + jid + '" value="' + startT + '" onchange="updateSummary()"/></div>' +
       '<div><label>Finish time</label><input type="time" id="jfinish-' + jid + '" value="' + endT   + '" onchange="updateSummary()"/></div>' +
     '</div>' +
@@ -425,6 +425,30 @@ function showSuccess(payload) {
     '</button>';
 }
 
+async function lookupJob(jid) {
+  var input  = document.getElementById('jnum-' + jid);
+  var status = document.getElementById('jlookup-' + jid);
+  var num    = (input.value || '').trim();
+  if (!num) { status.textContent = 'Please enter a job number first.'; status.style.color = 'var(--red)'; return; }
+  status.textContent = 'Looking up job\u2026';
+  status.style.color = 'var(--t2)';
+  try {
+    var data = await proxyGet("lookupjob", { job_number: num });
+    if (data.success) {
+      document.getElementById('juuid-' + jid).value = data.job_uuid;
+      input.value = data.job_number;
+      status.textContent = '\u2713 ' + (data.job_address || data.contact || data.job_number);
+      status.style.color = 'var(--green)';
+      updateSummary();
+    } else {
+      status.textContent = 'Job not found \u2014 check the number and try again.';
+      status.style.color = 'var(--red)';
+    }
+  } catch(e) {
+    status.textContent = 'Could not look up job.';
+    status.style.color = 'var(--red)';
+  }
+}
 async function lookupJob(jid) {
   var input  = document.getElementById('jnum-' + jid);
   var status = document.getElementById('jlookup-' + jid);
