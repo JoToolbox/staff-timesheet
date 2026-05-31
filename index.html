@@ -92,22 +92,23 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 <div class="page" id="main-page" style="display:none">
 
-  <div class="card">
-    <div class="card-hdr"><span class="card-hdr-title">Who are you?</span></div>
-    <div class="card-body">
-      <div class="g2">
-        <div>
-          <label for="staff-select">Your name</label>
-          <select id="staff-select">
-            <option value="">Select your name…</option>
-          </select>
-        </div>
-        <div>
-          <label for="week-ending">Week ending</label>
-          <input type="date" id="week-ending"/>
-        </div>
-      </div>
-      <button class="btn btn-load" id="load-btn" onclick="loadSchedule()">
+ <div class="g2">
+  <div>
+    <label for="staff-select">Your name</label>
+    <select id="staff-select">
+      <option value="">Select your name…</option>
+    </select>
+  </div>
+  <div>
+    <label for="week-ending">Week ending</label>
+    <input type="date" id="week-ending"/>
+  </div>
+</div>
+<div class="g1" style="margin-bottom:9px">
+  <label for="staff-pin">Your PIN</label>
+  <input type="password" id="staff-pin" placeholder="Enter your 4-digit PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*"/>
+</div>
+<button class="btn btn-load" id="load-btn" onclick="loadSchedule()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 0-.49-4.49"/></svg>
         Load my schedule
       </button>
@@ -141,7 +142,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 <script>
 // ── ONLY LINE YOU NEED TO CHANGE ────────────────────────────────
-var PROXY_URL = "https://script.google.com/macros/s/AKfycbxjAL46NsiSS1hiPB1BKMTFz986iCy3P_jkds1ctmAEPK1wyx6OTKuOluNonE8vJwSPOw/exec";
+var PROXY_URL = "https://script.google.com/macros/s/AKfycbwMMmzo1WSdiByqi4C72rZs1ti1QNQ98VKiOCPhS7fi6SyePsCo_4EqAg5YpVum85rGZA/exec";
 // ───────────────────────────────────────────────────────────────
 
 var DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
@@ -210,9 +211,24 @@ async function loadStaff() {
 async function loadSchedule() {
   var staffUuid  = document.getElementById('staff-select').value;
   var weekEnding = document.getElementById('week-ending').value;
+ var pin = document.getElementById('staff-pin').value.trim();
   if (!staffUuid)  { setStatus('load-status', "Please select your name first.", 'err'); return; }
   if (!weekEnding) { setStatus('load-status', "Please select a week ending date.", 'err'); return; }
-  showLoading("Loading your jobs from ServiceM8…");
+  if (!pin)        { setStatus('load-status', "Please enter your PIN.", 'err'); return; }
+  showLoading("Verifying PIN\u2026");
+  try {
+    var pinCheck = await proxyGet("verifypin", { staff_uuid: staffUuid, pin: pin });
+    if (!pinCheck.success) {
+      hideLoading();
+      setStatus('load-status', "Incorrect PIN \u2014 please try again.", 'err');
+      return;
+    }
+  } catch(e) {
+    hideLoading();
+    setStatus('load-status', "Could not verify PIN. Check your internet.", 'err');
+    return;
+  }
+  showLoading("Loading your schedule\u2026");
   try {
     var data = await proxyGet("schedule", { staff_uuid: staffUuid, week_ending: weekEnding });
     if (!data.success) throw new Error(data.message || "Could not load schedule");
