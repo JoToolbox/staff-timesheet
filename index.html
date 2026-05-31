@@ -155,15 +155,16 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 function setDefaultWeek() {
-  var today = new Date();
-  var day   = today.getDay();
-  var daysUntilFri;
-  if (day === 6) {
-    daysUntilFri = 6;
-  } else {
-    daysUntilFri = 5 - day;
-    if (daysUntilFri <= 0) daysUntilFri += 7;
-  }
+  var now  = new Date();
+  var day  = now.getDay();
+  // Days until Friday: Sun=5, Mon=4, Tue=3, Wed=2, Thu=1, Fri=7, Sat=6
+  var daysToFri = [5,4,3,2,1,7,6][day];
+  now.setDate(now.getDate() + daysToFri);
+  var yyyy = now.getFullYear();
+  var mm   = String(now.getMonth() + 1).padStart(2,'0');
+  var dd   = String(now.getDate()).padStart(2,'0');
+  document.getElementById('week-ending').value = yyyy + '-' + mm + '-' + dd;
+}
   var fri  = new Date(today);
   fri.setDate(today.getDate() + daysUntilFri);
   var yyyy = fri.getFullYear();
