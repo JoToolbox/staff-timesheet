@@ -156,13 +156,14 @@ window.addEventListener('DOMContentLoaded', function() {
 
 function setDefaultWeek() {
   var now  = new Date();
-  var day  = now.getDay();
-  // Days until Sunday: Sun=7, Mon=6, Tue=5, Wed=4, Thu=3, Fri=2, Sat=1
-  var daysToSun = [7,6,5,4,3,2,1][day];
-  now.setDate(now.getDate() + daysToSun);
-  var yyyy = now.getFullYear();
-  var mm   = String(now.getMonth() + 1).padStart(2,'0');
-  var dd   = String(now.getDate()).padStart(2,'0');
+  var day  = now.getDay(); // 0=Sun, 1=Mon... 6=Sat
+  // Days until coming Sunday
+  var daysToSun = day === 0 ? 0 : 7 - day;
+  var sun  = new Date(now);
+  sun.setDate(now.getDate() + daysToSun);
+  var yyyy = sun.getFullYear();
+  var mm   = String(sun.getMonth() + 1).padStart(2,'0');
+  var dd   = String(sun.getDate()).padStart(2,'0');
   document.getElementById('week-ending').value = yyyy + '-' + mm + '-' + dd;
 }
   
