@@ -157,9 +157,9 @@ window.addEventListener('DOMContentLoaded', function() {
 function setDefaultWeek() {
   var now  = new Date();
   var day  = now.getDay();
-  // Days until Friday: Sun=5, Mon=4, Tue=3, Wed=2, Thu=1, Fri=7, Sat=6
-  var daysToFri = [5,4,3,2,1,7,6][day];
-  now.setDate(now.getDate() + daysToFri);
+  // Days until Sunday: Sun=7, Mon=6, Tue=5, Wed=4, Thu=3, Fri=2, Sat=1
+  var daysToSun = [7,6,5,4,3,2,1][day];
+  now.setDate(now.getDate() + daysToSun);
   var yyyy = now.getFullYear();
   var mm   = String(now.getMonth() + 1).padStart(2,'0');
   var dd   = String(now.getDate()).padStart(2,'0');
