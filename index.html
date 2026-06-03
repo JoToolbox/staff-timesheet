@@ -232,21 +232,19 @@ async function loadStaff() {
 async function loadSchedule() {
   var staffUuid  = document.getElementById('staff-select').value;
   var weekEnding = document.getElementById('week-ending').value;
+  var pin        = document.getElementById('staff-pin').value.trim();
   if (!staffUuid)  { setStatus('load-status', "Please select your name first.", 'err'); return; }
   if (!weekEnding) { setStatus('load-status', "Please select a week ending date.", 'err'); return; }
+  if (!pin)        { setStatus('load-status', "Please enter your PIN.", 'err'); return; }
   showLoading("Loading your schedule\u2026");
   try {
-    var data = await proxyGet("schedule", { staff_uuid: staffUuid, week_ending: weekEnding });
+    var data = await proxyGet("schedule", { staff_uuid: staffUuid, week_ending: weekEnding, pin: pin });
     if (!data.success) throw new Error(data.message || "Could not load schedule");
-
     currentSchedule = data.schedule;
     isEdit          = data.is_edit || false;
-
     buildDays(currentSchedule, isEdit);
-
     document.getElementById('summary-card').style.display   = '';
     document.getElementById('submit-section').style.display = '';
-
     if (isEdit) {
       setStatus('load-status', "Previous submission loaded \u2014 make your changes and tap Update.", 'ok');
       document.getElementById('submit-btn').textContent = '\u270E Update ServiceM8';
