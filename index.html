@@ -23,6 +23,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 
 textarea{resize:vertical;min-height:58px;line-height:1.5}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239E9C96' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+.g1{margin-bottom:9px}
 .btn{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;border-radius:var(--r);padding:9px 15px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .12s}
 .btn:hover{background:var(--s2)}.btn:active{transform:scale(.98)}
 .btn-primary{background:var(--text);color:#fff;border-color:var(--text);font-size:15px;padding:13px 20px;width:100%;font-weight:600}
@@ -55,6 +56,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .rm-btn:hover{color:var(--red);background:var(--rbg)}
 .job-address{font-size:12px;color:var(--t2);margin-bottom:8px;padding:5px 8px;background:var(--surface);border-radius:6px;border:1px solid var(--border);display:flex;align-items:flex-start;gap:5px;line-height:1.4}
 .auto-banner{font-size:11px;color:var(--green);background:var(--gbg);border:1px solid #A7F3D0;border-radius:6px;padding:4px 9px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.edit-banner{font-size:11px;color:#92400E;background:#FFFBEB;border:1px solid #FCD34D;border-radius:6px;padding:6px 10px;margin-bottom:10px;display:flex;align-items:center;gap:5px}
 .loading-overlay{position:fixed;inset:0;background:rgba(245,244,240,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;gap:12px}
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -92,23 +94,22 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 <div class="page" id="main-page" style="display:none">
 
- <div class="g2">
-  <div>
-    <label for="staff-select">Your name</label>
-    <select id="staff-select">
-      <option value="">Select your name…</option>
-    </select>
-  </div>
-  <div>
-    <label for="week-ending">Week ending</label>
-    <input type="date" id="week-ending"/>
-  </div>
-</div>
-<div class="g1" style="margin-bottom:9px">
-  <label for="staff-pin">Your PIN</label>
-  <input type="password" id="staff-pin" placeholder="Enter your 4-digit PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*"/>
-</div>
-<button class="btn btn-load" id="load-btn" onclick="loadSchedule()">
+  <div class="card">
+    <div class="card-hdr"><span class="card-hdr-title">Who are you?</span></div>
+    <div class="card-body">
+      <div class="g2">
+        <div>
+          <label for="staff-select">Your name</label>
+          <select id="staff-select">
+            <option value="">Select your name…</option>
+          </select>
+        </div>
+        <div>
+          <label for="week-ending">Week ending</label>
+          <input type="date" id="week-ending"/>
+        </div>
+      </div>
+      <button class="btn btn-load" id="load-btn" onclick="loadSchedule()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 0-.49-4.49"/></svg>
         Load my schedule
       </button>
@@ -141,13 +142,14 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <script>
-// ── ONLY LINE YOU NEED TO CHANGE ────────────────────────────────
-var PROXY_URL = "https://script.google.com/macros/s/AKfycbx40V9FIDQ2gc4KOPQVds8VpKotmRLtXKqUdxSsFrsOtlvXBR56mHY2TtaIDb-C81M-4A/exec";
-// ───────────────────────────────────────────────────────────────
+// ── PASTE YOUR GOOGLE APPS SCRIPT URL BETWEEN THE QUOTES BELOW ──
+var PROXY_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+// ────────────────────────────────────────────────────────────────
 
 var DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-var jobCounters = {};
+var jobCounters    = {};
 var currentSchedule = [];
+var isEdit          = false;
 
 window.addEventListener('DOMContentLoaded', function() {
   setDefaultWeek();
@@ -155,45 +157,50 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 function setDefaultWeek() {
-  var now  = new Date();
-  var day  = now.getDay(); // 0=Sun, 1=Mon... 6=Sat
-  // Days until coming Sunday
-  var daysToSun = day === 0 ? 0 : 7 - day;
-  var sun  = new Date(now);
-  sun.setDate(now.getDate() + daysToSun);
-  var yyyy = sun.getFullYear();
-  var mm   = String(sun.getMonth() + 1).padStart(2,'0');
-  var dd   = String(sun.getDate()).padStart(2,'0');
-  document.getElementById('week-ending').value = yyyy + '-' + mm + '-' + dd;
+  var today = new Date();
+  var fri   = new Date(today);
+  fri.setDate(today.getDate() + (5 - today.getDay() + 7) % 7);
+  document.getElementById('week-ending').value = fri.toISOString().split('T')[0];
 }
-  
+
 function showLoading(msg) {
-  document.getElementById('loading-text').textContent = msg || "Loading…";
+  document.getElementById('loading-text').textContent = msg || "Loading\u2026";
   document.getElementById('loading-overlay').style.display = 'flex';
 }
 function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
-function showPage()    { document.getElementById('main-page').style.display = ''; }
+function showPage()    { document.getElementById('main-page').style.display = '';           }
 
-// All data fetching goes through the proxy — browser never contacts ServiceM8 directly
 async function proxyGet(action, params) {
   var url = PROXY_URL + "?action=" + encodeURIComponent(action);
-  if (params) Object.keys(params).forEach(function(k) { url += "&" + encodeURIComponent(k) + "=" + encodeURIComponent(params[k]); });
+  if (params) Object.keys(params).forEach(function(k) {
+    url += "&" + encodeURIComponent(k) + "=" + encodeURIComponent(params[k]);
+  });
   var res = await fetch(url);
   return res.json();
 }
 
 async function proxyPost(payload) {
-  var encoded = encodeURIComponent(JSON.stringify(payload));
-  var url = PROXY_URL + "?action=submit&data=" + encoded;
-  var res = await fetch(url);
+  var res = await fetch(PROXY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
   return res.json();
 }
+
+function setStatus(id, msg, type) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  el.className   = 'status ' + (type || '');
+}
+
+// ── Load staff list ───────────────────────────────────────────
 async function loadStaff() {
-  showLoading("Connecting to ServiceM8…");
+  showLoading("Connecting to ServiceM8\u2026");
   try {
-    if (!PROXY_URL || PROXY_URL === "https://script.google.com/macros/s/AKfycbywdia3xzfXmR7G1Kt9cjS9-kN7CgpXOgbd5NiWA9AXbKsanS2WyLTAyi4s1SXwN3w9aA/exec") {
+    if (!PROXY_URL || PROXY_URL === "PASTE_YOUR_APPS_SCRIPT_URL_HERE") {
       hideLoading(); showPage();
-      setStatus('load-status', "Form is not configured yet — please contact your manager.", 'err');
+      setStatus('load-status', "Form not configured \u2014 please contact your manager.", 'err');
       return;
     }
     var data = await proxyGet("staff");
@@ -211,22 +218,32 @@ async function loadStaff() {
   }
 }
 
+// ── Load schedule or previous submission ─────────────────────
 async function loadSchedule() {
   var staffUuid  = document.getElementById('staff-select').value;
   var weekEnding = document.getElementById('week-ending').value;
- var pin = document.getElementById('staff-pin').value.trim();
   if (!staffUuid)  { setStatus('load-status', "Please select your name first.", 'err'); return; }
   if (!weekEnding) { setStatus('load-status', "Please select a week ending date.", 'err'); return; }
-  if (!pin)        { setStatus('load-status', "Please enter your PIN.", 'err'); return; }
- showLoading("Loading your schedule\u2026");
+  showLoading("Loading your schedule\u2026");
   try {
-   var data = await proxyGet("schedule", { staff_uuid: staffUuid, week_ending: weekEnding, pin: pin });
+    var data = await proxyGet("schedule", { staff_uuid: staffUuid, week_ending: weekEnding });
     if (!data.success) throw new Error(data.message || "Could not load schedule");
+
     currentSchedule = data.schedule;
-    buildDays(currentSchedule);
-    document.getElementById('summary-card').style.display  = '';
+    isEdit          = data.is_edit || false;
+
+    buildDays(currentSchedule, isEdit);
+
+    document.getElementById('summary-card').style.display   = '';
     document.getElementById('submit-section').style.display = '';
-    setStatus('load-status', "Schedule loaded — confirm your hours below and submit.", 'ok');
+
+    if (isEdit) {
+      setStatus('load-status', "Previous submission loaded \u2014 make your changes and tap Update.", 'ok');
+      document.getElementById('submit-btn').textContent = '\u270E Update ServiceM8';
+    } else {
+      setStatus('load-status', "Schedule loaded \u2014 confirm your hours and submit.", 'ok');
+      document.getElementById('submit-btn').textContent = 'Submit to ServiceM8';
+    }
     updateSummary();
   } catch(e) {
     setStatus('load-status', "Could not load schedule: " + e.message, 'err');
@@ -234,20 +251,18 @@ async function loadSchedule() {
   hideLoading();
 }
 
-function setStatus(id, msg, type) {
-  var el = document.getElementById(id);
-  el.textContent = msg; el.className = 'status ' + (type || '');
-}
-
-function buildDays(schedule) {
+// ── Build days ───────────────────────────────────────────────
+function buildDays(schedule, editMode) {
   var c = document.getElementById('days-container'); c.innerHTML = '';
   jobCounters = {};
   schedule.forEach(function(dayData) {
-    var day = dayData.day;
+    var day     = dayData.day;
     jobCounters[day] = 1;
     var hasJobs = dayData.jobs && dayData.jobs.length > 0;
-    var block = document.createElement('div');
+    var noWork  = dayData.no_work || false;
+    var block   = document.createElement('div');
     block.className = 'day-block'; block.id = 'day-' + day;
+    if (noWork) block.classList.add('day-dimmed');
     block.innerHTML =
       '<div class="day-hdr">' +
         '<div class="day-meta">' +
@@ -255,9 +270,10 @@ function buildDays(schedule) {
           '<span class="day-date">' + (dayData.date || '') + '</span>' +
           (hasJobs ? '<span class="day-jobs-count">' + dayData.jobs.length + ' job' + (dayData.jobs.length > 1 ? 's' : '') + '</span>' : '') +
         '</div>' +
-        '<button class="nowork-btn" id="nwbtn-' + day + '" onclick="toggleNoWork(\'' + day + '\')">No work</button>' +
+        '<button class="nowork-btn" id="nwbtn-' + day + '" onclick="toggleNoWork(\'' + day + '\')">' + (noWork ? 'Undo' : 'No work') + '</button>' +
       '</div>' +
-      '<div class="day-body" id="dbody-' + day + '">' +
+      '<div class="day-body" id="dbody-' + day + '"' + (noWork ? ' style="display:none"' : '') + '>' +
+        (editMode ? '<div class="edit-banner"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editing previous submission</div>' : '') +
         '<div id="djobs-' + day + '"></div>' +
         '<button class="add-job-btn" onclick="addJobCard(\'' + day + '\', null, false)">' +
           '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
@@ -271,39 +287,46 @@ function buildDays(schedule) {
   });
 }
 
+// ── Add job card ─────────────────────────────────────────────
 function addJobCard(day, jobData, isScheduled) {
-  var c   = document.getElementById('djobs-' + day);
-  var idx = jobCounters[day]++;
-  var jid = day + '-' + idx;
-  var uuid   = jobData ? (jobData.job_uuid        || '') : '';
-  var num    = jobData ? (jobData.job_number       || '') : '';
-  var addr   = jobData ? (jobData.job_address      || jobData.contact_name || '') : '';
-  var startT = jobData ? (jobData.scheduled_start  || '') : '';
-  var endT   = jobData ? (jobData.scheduled_end    || '') : '';
-  var div = document.createElement('div');
+  var c      = document.getElementById('djobs-' + day);
+  var idx    = jobCounters[day]++;
+  var jid    = day + '-' + idx;
+  var uuid   = jobData ? (jobData.job_uuid    || '') : '';
+  var num    = jobData ? (jobData.job_number  || '') : '';
+  var addr   = jobData ? (jobData.job_address || jobData.contact_name || '') : '';
+  // Saved submission fields take priority over scheduled fields
+  var hasSaved = jobData && (jobData.start_time || jobData.finish_time || jobData.travel_minutes || jobData.break_minutes || jobData.notes);
+  var startT = jobData ? (jobData.start_time    || (!hasSaved ? jobData.scheduled_start : '') || '') : '';
+  var endT   = jobData ? (jobData.finish_time   || (!hasSaved ? jobData.scheduled_end   : '') || '') : '';
+  var travel = jobData ? (jobData.travel_minutes !== undefined && jobData.travel_minutes !== null ? jobData.travel_minutes : '') : '';
+  var brk    = jobData ? (jobData.break_minutes  !== undefined && jobData.break_minutes  !== null ? jobData.break_minutes  : '') : '';
+  var notes  = jobData ? (jobData.notes || '') : '';
+  var div    = document.createElement('div');
   div.className = 'job-card'; div.id = 'jcard-' + jid;
   div.innerHTML =
     '<div class="job-card-top">' +
       '<span class="job-pill' + (isScheduled ? ' scheduled' : '') + '">' +
-        (isScheduled ? '⚡ ' : '') + 'Job ' + idx + (num ? ' · ' + num : '') +
+        (isScheduled ? '\u26A1 ' : '') + 'Job ' + idx + (num ? ' \u00B7 ' + num : '') +
       '</span>' +
       '<div class="job-card-actions">' +
-        (uuid ? '<button class="btn btn-outline-blue" onclick="openInSM8(\'' + uuid + '\')" style="font-size:11px;padding:3px 9px">Open in SM8</button>' : '') +
         '<button class="rm-btn" onclick="removeJob(\'' + jid + '\')">&times;</button>' +
       '</div>' +
     '</div>' +
-    (isScheduled ? '<div class="auto-banner"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Auto-filled from ServiceM8</div>' : '') +
     (addr ? '<div class="job-address"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + addr + '</div>' : '') +
-   '<input type="hidden" id="juuid-' + jid + '" value="' + uuid + '"/>' +
-(!isScheduled ? '<div class="g1"><label>Job number</label><div style="display:flex;gap:6px"><input type="text" id="jnum-' + jid + '" placeholder="e.g. 413 or WW/413" onchange="updateSummary()"/><button class="btn btn-outline-blue" style="white-space:nowrap;flex-shrink:0" onclick="lookupJob(\'' + jid + '\')">Find job</button></div><div id="jlookup-' + jid + '" style="font-size:12px;margin-top:4px"></div></div>' : '<input type="hidden" id="jnum-' + jid + '" value="' + num + '"/>') +
+    '<input type="hidden" id="juuid-' + jid + '" value="' + uuid + '"/>' +
+    (!isScheduled || !num
+      ? '<div class="g1"><label>Job number / search</label><div style="display:flex;gap:6px"><input type="text" id="jnum-' + jid + '" value="' + num + '" placeholder="Job number, client name or address\u2026" onchange="updateSummary()"/><button class="btn btn-outline-blue" style="white-space:nowrap;flex-shrink:0;font-size:12px;padding:0 10px" onclick="lookupJob(\'' + jid + '\')">Find</button></div><div id="jlookup-' + jid + '" style="font-size:12px;margin-top:4px"></div></div>'
+      : '<input type="hidden" id="jnum-' + jid + '" value="' + num + '"/>') +
+    '<div class="g2">' +
       '<div><label>Start time</label><input type="time" id="jstart-'  + jid + '" value="' + startT + '" onchange="updateSummary()"/></div>' +
       '<div><label>Finish time</label><input type="time" id="jfinish-' + jid + '" value="' + endT   + '" onchange="updateSummary()"/></div>' +
     '</div>' +
     '<div class="g2">' +
-      '<div><label>Travel (min)</label><input type="number" min="0" step="5" placeholder="0" id="jtravel-' + jid + '" onchange="updateSummary()"/></div>' +
-      '<div><label>Break (min)</label><input type="number"  min="0" step="5" placeholder="0" id="jbreak-'  + jid + '" onchange="updateSummary()"/></div>' +
+      '<div><label>Travel (min)</label><input type="number" min="0" step="5" placeholder="0" id="jtravel-' + jid + '" value="' + travel + '" onchange="updateSummary()"/></div>' +
+      '<div><label>Break (min)</label><input type="number"  min="0" step="5" placeholder="0" id="jbreak-'  + jid + '" value="' + brk    + '" onchange="updateSummary()"/></div>' +
     '</div>' +
-    '<div><label>Job notes</label><textarea id="jnotes-' + jid + '" placeholder="Work completed, materials used, issues…"></textarea></div>';
+    '<div><label>Job notes</label><textarea id="jnotes-' + jid + '" placeholder="Work completed, materials used, issues\u2026">' + notes + '</textarea></div>';
   c.appendChild(div);
   updateSummary();
 }
@@ -322,12 +345,6 @@ function toggleNoWork(day) {
 
 function removeJob(jid) { var el = document.getElementById('jcard-' + jid); if (el) el.remove(); updateSummary(); }
 
-function openInSM8(uuid) {
-  if (!uuid) return;
-  window.location.href = 'servicem8://job/' + uuid;
-  setTimeout(function() { window.open('https://go.servicem8.com/job/' + uuid, '_blank'); }, 400);
-}
-
 function timeDiff(s, f) {
   if (!s || !f) return 0;
   var sh=+s.split(':')[0], sm=+s.split(':')[1], fh=+f.split(':')[0], fm=+f.split(':')[1];
@@ -337,7 +354,7 @@ function timeDiff(s, f) {
 function updateSummary() {
   var totMins=0, totTravel=0, totBreak=0, totJobs=0;
   DAYS.forEach(function(day) {
-    var body = document.getElementById('dbody-' + day);
+    var body  = document.getElementById('dbody-' + day);
     if (!body || body.style.display === 'none') return;
     var cards = document.getElementById('djobs-' + day);
     if (!cards) return;
@@ -351,10 +368,10 @@ function updateSummary() {
     });
   });
   var net = Math.max(0,(totMins-totBreak)/60);
-  document.getElementById('s-hours').textContent  = net.toFixed(1);
-  document.getElementById('s-jobs').textContent   = totJobs;
-  document.getElementById('s-travel').innerHTML   = totTravel+'<span class="stat-unit"> min</span>';
-  document.getElementById('s-break').innerHTML    = totBreak +'<span class="stat-unit"> min</span>';
+  document.getElementById('s-hours').textContent = net.toFixed(1);
+  document.getElementById('s-jobs').textContent  = totJobs;
+  document.getElementById('s-travel').innerHTML  = totTravel+'<span class="stat-unit"> min</span>';
+  document.getElementById('s-break').innerHTML   = totBreak +'<span class="stat-unit"> min</span>';
 }
 
 function buildPayload() {
@@ -366,7 +383,7 @@ function buildPayload() {
     var day  = dayData.day;
     var body = document.getElementById('dbody-' + day);
     if (!body || body.style.display === 'none') return { day:day, date:dayData.date, no_work:true, jobs:[] };
-    var jobs = [];
+    var jobs  = [];
     var cards = document.getElementById('djobs-' + day);
     if (cards) cards.querySelectorAll('.job-card').forEach(function(card) {
       var jid    = card.id.replace('jcard-','');
@@ -378,26 +395,33 @@ function buildPayload() {
       var brk    = parseInt((document.getElementById('jbreak-'  + jid)||{}).value)||0;
       var notes  = (document.getElementById('jnotes-'  + jid)||{}).value||'';
       var netH   = Math.max(0,(timeDiff(start,finish)-brk)/60);
-      jobs.push({job_uuid:uuid,job_number:num,start_time:start,finish_time:finish,travel_minutes:travel,break_minutes:brk,net_hours:parseFloat(netH.toFixed(2)),notes:notes});
+      jobs.push({ job_uuid:uuid, job_number:num, start_time:start, finish_time:finish,
+                  travel_minutes:travel, break_minutes:brk,
+                  net_hours:parseFloat(netH.toFixed(2)), notes:notes });
     });
     return { day:day, date:dayData.date, no_work:false, jobs:jobs };
   });
-  return { staff_name:staffName, staff_uuid:staffUuid, week_ending:weekEnding, submitted_at:new Date().toISOString(), days:days };
+  return { staff_name:staffName, staff_uuid:staffUuid, week_ending:weekEnding,
+           submitted_at:new Date().toISOString(), is_edit:isEdit, days:days };
 }
 
 async function submitTimesheet() {
   var staffUuid  = document.getElementById('staff-select').value;
   var weekEnding = document.getElementById('week-ending').value;
-  var btn = document.getElementById('submit-btn');
-  if (!staffUuid)           { setStatus('status-msg','Please select your name.','err'); return; }
-  if (!weekEnding)          { setStatus('status-msg','Please select a week ending date.','err'); return; }
+  var btn        = document.getElementById('submit-btn');
+  if (!staffUuid)              { setStatus('status-msg','Please select your name.','err'); return; }
+  if (!weekEnding)             { setStatus('status-msg','Please select a week ending date.','err'); return; }
   if (!currentSchedule.length) { setStatus('status-msg','Please load your schedule first.','err'); return; }
   var payload = buildPayload();
   btn.disabled = true;
-  setStatus('status-msg','Submitting to ServiceM8…','loading');
+  setStatus('status-msg', isEdit ? 'Updating ServiceM8\u2026 removing old entries first' : 'Submitting to ServiceM8\u2026', 'loading');
   try {
     var result = await proxyPost(payload);
-    showSuccess(payload);
+    if (result.success) {
+      showSuccess(payload);
+    } else {
+      setStatus('status-msg','Some jobs could not be submitted: ' + (result.errors||[]).join(', '),'err');
+    }
   } catch(e) {
     setStatus('status-msg','Could not reach the server. Check your internet and try again.','err');
   }
@@ -413,15 +437,15 @@ function showSuccess(payload) {
   section.innerHTML =
     '<div class="result-card">' +
       '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#057A55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
-      '<div class="result-title">Submitted to ServiceM8 ✓</div>' +
-      '<div class="result-sub">' + payload.staff_name + ' — week ending ' + dateStr + '</div>' +
+      '<div class="result-title">' + (payload.is_edit ? 'Timesheet updated in ServiceM8 \u2713' : 'Submitted to ServiceM8 \u2713') + '</div>' +
+      '<div class="result-sub">' + payload.staff_name + ' \u2014 week ending ' + dateStr + '</div>' +
       '<div class="result-rows">' +
         '<div style="font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px">Jobs submitted</div>' +
-        allJobs.map(function(j){ return '<div class="result-row"><span>'+j.day+' — '+(j.job.job_number?'Job '+j.job.job_number:'Unscheduled')+'</span><span>'+(j.job.net_hours||0).toFixed(2)+' hrs</span></div>'; }).join('') +
+        allJobs.map(function(j){ return '<div class="result-row"><span>'+j.day+' \u2014 '+(j.job.job_number?'Job '+j.job.job_number:'Unscheduled')+'</span><span>'+(j.job.net_hours||0).toFixed(2)+' hrs</span></div>'; }).join('') +
         '<div class="result-row result-total"><span>Total</span><span>'+totalH.toFixed(2)+' hrs</span></div>' +
       '</div>' +
     '</div>' +
-    '<button class="btn" style="width:100%;justify-content:center" onclick="location.reload()">' +
+    '<button class="btn" style="width:100%;justify-content:center;margin-top:4px" onclick="location.reload()">' +
       '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.1"/></svg>' +
       'Start new timesheet' +
     '</button>';
@@ -430,44 +454,54 @@ function showSuccess(payload) {
 async function lookupJob(jid) {
   var input  = document.getElementById('jnum-' + jid);
   var status = document.getElementById('jlookup-' + jid);
-  var num    = (input.value || '').trim();
-  if (!num) { status.textContent = 'Please enter a job number first.'; status.style.color = 'var(--red)'; return; }
-  status.textContent = 'Looking up job\u2026';
+  var query  = (input.value || '').trim();
+  if (!query) { status.textContent = 'Enter a job number, client name or address.'; status.style.color = 'var(--red)'; return; }
+  status.textContent = 'Searching\u2026';
   status.style.color = 'var(--t2)';
   try {
-    var data = await proxyGet("lookupjob", { job_number: num });
-    if (data.success) {
+    var data = await proxyGet("lookupjob", { job_number: query });
+    if (data.success && data.jobs && data.jobs.length > 0) {
+      if (data.jobs.length === 1) {
+        // Single match — auto select
+        var j = data.jobs[0];
+        document.getElementById('juuid-' + jid).value = j.job_uuid;
+        input.value = j.job_number;
+        status.textContent = '\u2713 ' + j.job_number + (j.job_address ? ' \u2014 ' + j.job_address : '') + (j.contact ? ' (' + j.contact + ')' : '');
+        status.style.color = 'var(--green)';
+        updateSummary();
+      } else {
+        // Multiple matches — show dropdown
+        status.innerHTML = '';
+        var dd = document.createElement('div');
+        dd.style.cssText = 'border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);margin-top:4px;max-height:180px;overflow-y:auto;';
+        data.jobs.forEach(function(j) {
+          var item = document.createElement('div');
+          item.style.cssText = 'padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;';
+          item.innerHTML = '<span style="font-weight:600;color:var(--blue);font-family:\'DM Mono\',monospace">' + j.job_number + '</span>' +
+            (j.contact ? ' <span style="color:var(--t2)">' + j.contact + '</span>' : '') +
+            (j.job_address ? '<br><span style="font-size:11px;color:var(--t3)">' + j.job_address + '</span>' : '');
+          item.addEventListener('click', function() {
+            document.getElementById('juuid-' + jid).value = j.job_uuid;
+            input.value = j.job_number;
+            status.textContent = '\u2713 ' + j.job_number + (j.job_address ? ' \u2014 ' + j.job_address : '');
+            status.style.color = 'var(--green)';
+            updateSummary();
+          });
+          item.addEventListener('mouseover', function() { item.style.background = 'var(--s2)'; });
+          item.addEventListener('mouseout',  function() { item.style.background = ''; });
+          dd.appendChild(item);
+        });
+        status.appendChild(dd);
+      }
+    } else if (data.success && data.job_uuid) {
+      // Legacy single result format
       document.getElementById('juuid-' + jid).value = data.job_uuid;
       input.value = data.job_number;
-      status.textContent = '\u2713 ' + (data.job_address || data.contact || data.job_number);
+      status.textContent = '\u2713 ' + data.job_number + (data.job_address ? ' \u2014 ' + data.job_address : '');
       status.style.color = 'var(--green)';
       updateSummary();
     } else {
-      status.textContent = 'Job not found \u2014 check the number and try again.';
-      status.style.color = 'var(--red)';
-    }
-  } catch(e) {
-    status.textContent = 'Could not look up job.';
-    status.style.color = 'var(--red)';
-  }
-}
-async function lookupJob(jid) {
-  var input  = document.getElementById('jnum-' + jid);
-  var status = document.getElementById('jlookup-' + jid);
-  var num    = (input.value || '').trim();
-  if (!num) { status.textContent = 'Please enter a job number first.'; status.style.color = 'var(--red)'; return; }
-  status.textContent = 'Looking up job\u2026';
-  status.style.color = 'var(--t2)';
-  try {
-    var data = await proxyGet("lookupjob", { job_number: num });
-    if (data.success) {
-      document.getElementById('juuid-' + jid).value = data.job_uuid;
-      input.value = data.job_number;
-      status.textContent = '\u2713 ' + (data.job_address || data.contact || data.job_number);
-      status.style.color = 'var(--green)';
-      updateSummary();
-    } else {
-      status.textContent = 'Job not found \u2014 check the number and try again.';
+      status.textContent = 'No jobs found \u2014 try a different number, name or address.';
       status.style.color = 'var(--red)';
     }
   } catch(e) {
