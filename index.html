@@ -395,7 +395,7 @@ function addJobCard(day, jobData, isScheduled, locked) {
     (addr ? '<div class="job-address"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + addr + '</div>' : '') +
     '<input type="hidden" id="juuid-' + jid + '" value="' + uuid + '"/>' +
     (!isScheduled && !locked
-      ? '<div class="g1"><label>Job number / search</label><div style="display:flex;gap:6px"><input type="text" id="jnum-' + jid + '" value="' + num + '" placeholder="Number, client name or address\u2026" onchange="onFieldChange()"/><button class="btn btn-outline-blue" style="white-space:nowrap;flex-shrink:0;font-size:12px;padding:0 10px" onclick="lookupJob(\'' + jid + '\')">Find</button></div><div id="jlookup-' + jid + '" style="font-size:12px;margin-top:4px"></div></div>'
+      ? '<div class="g1"><label>Job number / search</label><div style="display:flex;gap:6px"><input type="text" id="jnum-' + jid + '" value="' + num + '" placeholder="Job number or address\u2026" onchange="onFieldChange()"/><button class="btn btn-outline-blue" style="white-space:nowrap;flex-shrink:0;font-size:12px;padding:0 10px" onclick="lookupJob(\'' + jid + '\')">Find</button></div><div id="jlookup-' + jid + '" style="font-size:12px;margin-top:4px"></div></div>'
       : '<input type="hidden" id="jnum-' + jid + '" value="' + num + '"/>') +
     inputsHtml;
 
