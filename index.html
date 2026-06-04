@@ -94,6 +94,17 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="loading-text" id="loading-text">Connecting to ServiceM8…</div>
 </div>
 
+<!-- Submitted week warning modal -->
+<div class="modal-overlay" id="submitted-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">⚠️ Already submitted</div>
+    <div class="modal-body">This week has already been submitted to ServiceM8 and is <strong>locked</strong>.<br><br>You are viewing it in read-only mode. If you need to make a correction contact your admin team to unlock it.</div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="closeSubmittedModal()">OK, got it</button>
+    </div>
+  </div>
+</div>
+
 <!-- Submit confirmation modal -->
 <div class="modal-overlay" id="submit-modal" style="display:none">
   <div class="modal">
@@ -296,11 +307,13 @@ async function loadSchedule() {
     document.getElementById('submit-section').style.display = '';
 
     if (currentStatus === "submitted") {
-      // Locked — show read only view
-      setStatus('load-status', "This week has been submitted. Contact your admin to make changes.", 'ok');
+      // Locked — show read only view with clear warning
+      setStatus('load-status', "\u26A0\uFE0F This week has already been submitted and is locked. Shown in read-only mode below. Contact your admin if changes are needed.", 'err');
       document.getElementById('draft-btn').style.display  = 'none';
       document.getElementById('submit-btn').style.display = 'none';
       document.getElementById('autosave-indicator').style.display = 'none';
+      // Show warning popup
+      setTimeout(function() { document.getElementById('submitted-modal').style.display = 'flex'; }, 400);
       // Show unlock button
       var unlockRow = document.createElement('div');
       unlockRow.style.cssText = 'display:flex;justify-content:center;margin-top:8px';
@@ -513,6 +526,7 @@ function showSubmitModal() {
   if (!currentStaffUuid) { setStatus('status-msg','Please load your schedule first.','err'); return; }
   document.getElementById('submit-modal').style.display = 'flex';
 }
+function closeSubmittedModal() { document.getElementById('submitted-modal').style.display = 'none'; }
 function closeModal() { document.getElementById('submit-modal').style.display = 'none'; }
 
 async function confirmSubmit() {
@@ -570,7 +584,7 @@ async function lookupJob(jid) {
   var input  = document.getElementById('jnum-' + jid);
   var status = document.getElementById('jlookup-' + jid);
   var query  = (input.value || '').trim();
-  if (!query) { status.textContent = 'Enter a job number or address.'; status.style.color = 'var(--red)'; return; }
+  if (!query) { status.textContent = 'Enter a job number, client name or address.'; status.style.color = 'var(--red)'; return; }
   status.textContent = 'Searching\u2026';
   status.style.color = 'var(--t2)';
   try {
