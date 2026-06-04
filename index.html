@@ -570,7 +570,7 @@ async function lookupJob(jid) {
   var input  = document.getElementById('jnum-' + jid);
   var status = document.getElementById('jlookup-' + jid);
   var query  = (input.value || '').trim();
-  if (!query) { status.textContent = 'Enter a job number, client name or address.'; status.style.color = 'var(--red)'; return; }
+  if (!query) { status.textContent = 'Enter a job number or address.'; status.style.color = 'var(--red)'; return; }
   status.textContent = 'Searching\u2026';
   status.style.color = 'var(--t2)';
   try {
