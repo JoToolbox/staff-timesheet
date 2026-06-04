@@ -6,7 +6,7 @@
 <title>Weekly Timesheet</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F5F4F0;--surface:#fff;--s2:#EFEFEB;--s3:#E6E4DE;--border:#E0DED8;--border2:#C8C6BE;--text:#1A1917;--t2:#6B6A65;--t3:#9E9C96;--blue:#1A56DB;--blue-bg:#EEF3FD;--blue-text:#1A3A8F;--green:#057A55;--gbg:#ECFDF5;--gtext:#03543F;--red:#C81E1E;--rbg:#FDF2F2;--r:10px;--rl:14px}
+:root{--bg:#F5F4F0;--surface:#fff;--s2:#EFEFEB;--s3:#E6E4DE;--border:#E0DED8;--border2:#C8C6BE;--text:#1A1917;--t2:#6B6A65;--t3:#9E9C96;--blue:#1A56DB;--blue-bg:#EEF3FD;--blue-text:#1A3A8F;--green:#057A55;--gbg:#ECFDF5;--gtext:#03543F;--red:#C81E1E;--rbg:#FDF2F2;--amber:#92400E;--amber-bg:#FFFBEB;--amber-border:#FCD34D;--r:10px;--rl:14px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
@@ -18,7 +18,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .card-hdr-title{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.07em}
 .card-body{padding:13px 15px}
 label{font-size:12px;font-weight:500;color:var(--t2);display:block;margin-bottom:4px}
-input[type=text],input[type=date],input[type=time],input[type=number],textarea,select{width:100%;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;outline:none;-webkit-appearance:none;transition:border-color .15s}
+input[type=text],input[type=date],input[type=time],input[type=number],input[type=password],textarea,select{width:100%;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;outline:none;-webkit-appearance:none;transition:border-color .15s}
 input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.09)}
 textarea{resize:vertical;min-height:58px;line-height:1.5}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239E9C96' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px}
@@ -30,8 +30,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .btn-primary:hover{background:#2D2C29}.btn-primary:disabled{opacity:.35;cursor:default;transform:none}
 .btn-outline-blue{background:var(--blue-bg);color:var(--blue-text);border-color:#B8CEFA;font-size:12px;padding:4px 10px;border-radius:20px}
 .btn-outline-blue:hover{background:#DCE8FD}
+.btn-draft{background:var(--s2);color:var(--text);border-color:var(--border2);font-size:15px;padding:13px 20px;width:100%;font-weight:500;margin-bottom:8px}
+.btn-draft:hover{background:var(--s3)}
 .btn-load{background:var(--blue);color:#fff;border-color:var(--blue);width:100%;margin-top:4px}
 .btn-load:hover{background:#1446B8}
+.btn-amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);font-size:13px;padding:8px 14px}
+.btn-amber:hover{background:#FEF3C7}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .stat{background:var(--s2);border-radius:var(--r);padding:11px 13px}
 .stat-lbl{font-size:10px;color:var(--t3);margin-bottom:2px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
@@ -51,12 +55,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .job-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .job-pill{font-size:11px;font-weight:600;font-family:'DM Mono',monospace;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3px 9px;color:var(--t2)}
 .job-pill.scheduled{background:var(--blue-bg);border-color:#B8CEFA;color:var(--blue-text)}
-.job-card-actions{display:flex;gap:6px;align-items:center}
 .rm-btn{background:none;border:none;cursor:pointer;color:var(--t3);font-size:20px;padding:0 4px;line-height:1;border-radius:6px}
 .rm-btn:hover{color:var(--red);background:var(--rbg)}
 .job-address{font-size:12px;color:var(--t2);margin-bottom:8px;padding:5px 8px;background:var(--surface);border-radius:6px;border:1px solid var(--border);display:flex;align-items:flex-start;gap:5px;line-height:1.4}
-.auto-banner{font-size:11px;color:var(--green);background:var(--gbg);border:1px solid #A7F3D0;border-radius:6px;padding:4px 9px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
-.edit-banner{font-size:11px;color:#92400E;background:#FFFBEB;border:1px solid #FCD34D;border-radius:6px;padding:6px 10px;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.banner{font-size:11px;border-radius:6px;padding:5px 10px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.banner-amber{color:var(--amber);background:var(--amber-bg);border:1px solid var(--amber-border)}
+.banner-green{color:var(--gtext);background:var(--gbg);border:1px solid #A7F3D0}
+.banner-blue{color:var(--blue-text);background:var(--blue-bg);border:1px solid #B8CEFA}
 .loading-overlay{position:fixed;inset:0;background:rgba(245,244,240,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;gap:12px}
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -64,14 +69,22 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .status{font-size:13px;text-align:center;padding:10px 0;font-weight:500;line-height:1.5}
 .ok{color:var(--green)}.err{color:var(--red)}.loading{color:var(--t2)}
 .result-card{background:var(--gbg);border:1px solid #A7F3D0;border-radius:var(--rl);padding:20px 16px;text-align:center;margin-bottom:11px}
-.result-title{font-size:16px;font-weight:600;color:var(--gtext);margin:10px 0 4px}
-.result-sub{font-size:13px;color:var(--green)}
+.result-card-amber{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--rl);padding:20px 16px;text-align:center;margin-bottom:11px}
+.result-title{font-size:16px;font-weight:600;margin:10px 0 4px}
+.result-sub{font-size:13px}
 .result-rows{margin-top:12px;text-align:left}
-.result-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #A7F3D0;color:var(--gtext)}
+.result-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #A7F3D0}
 .result-row:last-child{border-bottom:none}
 .result-total{font-weight:600;border-top:2px solid #A7F3D0;margin-top:4px}
 .add-job-btn{width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:8px;border:1px dashed var(--border2);border-radius:var(--r);background:none;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:4px}
 .add-job-btn:hover{background:var(--s2);color:var(--text)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:600;padding:20px}
+.modal{background:var(--surface);border-radius:var(--rl);padding:24px 20px;max-width:400px;width:100%}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:8px}
+.modal-body{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:16px}
+.modal-actions{display:flex;gap:8px}
+.modal-actions .btn{flex:1}
+.autosave-indicator{font-size:11px;color:var(--t3);text-align:right;padding:2px 0 6px;min-height:16px}
 </style>
 </head>
 <body>
@@ -79,6 +92,32 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="loading-overlay" id="loading-overlay">
   <div class="spinner"></div>
   <div class="loading-text" id="loading-text">Connecting to ServiceM8…</div>
+</div>
+
+<!-- Submit confirmation modal -->
+<div class="modal-overlay" id="submit-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Submit timesheet?</div>
+    <div class="modal-body">Once submitted you <strong>cannot make changes</strong> yourself. If you need to correct something after submitting, contact your admin team.<br><br>Are you sure you want to submit?</div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmSubmit()">Yes, submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin unlock modal -->
+<div class="modal-overlay" id="unlock-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Admin unlock</div>
+    <div class="modal-body">Enter the admin PIN to unlock this timesheet for editing.</div>
+    <div class="g1"><label>Admin PIN</label><input type="password" id="admin-pin" placeholder="Enter admin PIN" maxlength="6" inputmode="numeric"/></div>
+    <div class="status" id="unlock-status"></div>
+    <div class="modal-actions" style="margin-top:8px">
+      <button class="btn" onclick="closeUnlockModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmUnlock()">Unlock</button>
+    </div>
+  </div>
 </div>
 
 <div class="topbar">
@@ -111,7 +150,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       </div>
       <div class="g1">
         <label for="staff-pin">Your PIN</label>
-        <input type="password" id="staff-pin" placeholder="Enter your 4-digit PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*"/>
+        <input type="password" id="staff-pin" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" pattern="[0-9]*"/>
       </div>
       <button class="btn btn-load" id="load-btn" onclick="loadSchedule()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 0-.49-4.49"/></svg>
@@ -136,7 +175,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div id="days-container"></div>
 
   <div id="submit-section" style="display:none">
-    <button class="btn btn-primary" id="submit-btn" onclick="submitTimesheet()">
+    <div class="autosave-indicator" id="autosave-indicator"></div>
+    <button class="btn btn-draft" id="draft-btn" onclick="saveDraft()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Save draft
+    </button>
+    <button class="btn btn-primary" id="submit-btn" onclick="showSubmitModal()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       Submit to ServiceM8
     </button>
@@ -151,9 +195,14 @@ var PROXY_URL = "https://script.google.com/macros/s/AKfycbx40V9FIDQ2gc4KOPQVds8V
 // ────────────────────────────────────────────────────────────────
 
 var DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-var jobCounters    = {};
+var jobCounters     = {};
 var currentSchedule = [];
 var isEdit          = false;
+var currentStatus   = "draft";
+var autoSaveTimer   = null;
+var currentStaffUuid = '';
+var currentWeekEnding = '';
+var currentStaffName  = '';
 
 window.addEventListener('DOMContentLoaded', function() {
   setDefaultWeek();
@@ -162,14 +211,13 @@ window.addEventListener('DOMContentLoaded', function() {
 
 function setDefaultWeek() {
   var today = new Date();
-  var day   = today.getDay(); // 0=Sun, 1=Mon ... 6=Sat
-  // Days until coming Sunday (if today is Sunday, go to next Sunday)
+  var day   = today.getDay();
   var daysToSun = day === 0 ? 7 : 7 - day;
-  var sun  = new Date(today);
+  var sun   = new Date(today);
   sun.setDate(today.getDate() + daysToSun);
-  var yyyy = sun.getFullYear();
-  var mm   = String(sun.getMonth() + 1).padStart(2, '0');
-  var dd   = String(sun.getDate()).padStart(2, '0');
+  var yyyy  = sun.getFullYear();
+  var mm    = String(sun.getMonth() + 1).padStart(2, '0');
+  var dd    = String(sun.getDate()).padStart(2, '0');
   document.getElementById('week-ending').value = yyyy + '-' + mm + '-' + dd;
 }
 
@@ -178,7 +226,7 @@ function showLoading(msg) {
   document.getElementById('loading-overlay').style.display = 'flex';
 }
 function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
-function showPage()    { document.getElementById('main-page').style.display = '';           }
+function showPage()    { document.getElementById('main-page').style.display = ''; }
 
 async function proxyGet(action, params) {
   var url = PROXY_URL + "?action=" + encodeURIComponent(action);
@@ -189,22 +237,14 @@ async function proxyGet(action, params) {
   return res.json();
 }
 
-async function proxyPost(payload) {
-  var res = await fetch(PROXY_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
-  });
-  return res.json();
-}
-
 function setStatus(id, msg, type) {
   var el = document.getElementById(id);
+  if (!el) return;
   el.textContent = msg;
   el.className   = 'status ' + (type || '');
 }
 
-// ── Load staff list ───────────────────────────────────────────
+// ── Load staff ────────────────────────────────────────────────
 async function loadStaff() {
   showLoading("Connecting to ServiceM8\u2026");
   try {
@@ -224,11 +264,11 @@ async function loadStaff() {
     hideLoading(); showPage();
   } catch(e) {
     hideLoading(); showPage();
-    setStatus('load-status', "Could not connect. Check your internet and try again. (" + e.message + ")", 'err');
+    setStatus('load-status', "Could not connect. Check your internet. (" + e.message + ")", 'err');
   }
 }
 
-// ── Load schedule or previous submission ─────────────────────
+// ── Load schedule ─────────────────────────────────────────────
 async function loadSchedule() {
   var staffUuid  = document.getElementById('staff-select').value;
   var weekEnding = document.getElementById('week-ending').value;
@@ -236,21 +276,42 @@ async function loadSchedule() {
   if (!staffUuid)  { setStatus('load-status', "Please select your name first.", 'err'); return; }
   if (!weekEnding) { setStatus('load-status', "Please select a week ending date.", 'err'); return; }
   if (!pin)        { setStatus('load-status', "Please enter your PIN.", 'err'); return; }
+
+  var staffName = document.getElementById('staff-select').options[document.getElementById('staff-select').selectedIndex].textContent;
+  currentStaffUuid  = staffUuid;
+  currentWeekEnding = weekEnding;
+  currentStaffName  = staffName;
+
   showLoading("Loading your schedule\u2026");
   try {
     var data = await proxyGet("schedule", { staff_uuid: staffUuid, week_ending: weekEnding, pin: pin });
     if (!data.success) throw new Error(data.message || "Could not load schedule");
+
     currentSchedule = data.schedule;
     isEdit          = data.is_edit || false;
-    buildDays(currentSchedule, isEdit);
+    currentStatus   = data.status  || "draft";
+
+    buildDays(currentSchedule, isEdit, currentStatus);
     document.getElementById('summary-card').style.display   = '';
     document.getElementById('submit-section').style.display = '';
-    if (isEdit) {
-      setStatus('load-status', "Previous submission loaded \u2014 make your changes and tap Update.", 'ok');
-      document.getElementById('submit-btn').textContent = '\u270E Update ServiceM8';
+
+    if (currentStatus === "submitted") {
+      // Locked — show read only view
+      setStatus('load-status', "This week has been submitted. Contact your admin to make changes.", 'ok');
+      document.getElementById('draft-btn').style.display  = 'none';
+      document.getElementById('submit-btn').style.display = 'none';
+      document.getElementById('autosave-indicator').style.display = 'none';
+      // Show unlock button
+      var unlockRow = document.createElement('div');
+      unlockRow.style.cssText = 'display:flex;justify-content:center;margin-top:8px';
+      unlockRow.innerHTML = '<button class="btn btn-amber" onclick="showUnlockModal()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Admin unlock</button>';
+      document.getElementById('submit-section').appendChild(unlockRow);
+    } else if (isEdit) {
+      setStatus('load-status', "Draft loaded \u2014 make your changes. Auto-saves as you type.", 'ok');
+      document.getElementById('submit-btn').innerHTML =
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Submit to ServiceM8';
     } else {
-      setStatus('load-status', "Schedule loaded \u2014 confirm your hours and submit.", 'ok');
-      document.getElementById('submit-btn').textContent = 'Submit to ServiceM8';
+      setStatus('load-status', "Schedule loaded \u2014 fill in your hours. Auto-saves as you type.", 'ok');
     }
     updateSummary();
   } catch(e) {
@@ -259,10 +320,11 @@ async function loadSchedule() {
   hideLoading();
 }
 
-// ── Build days ───────────────────────────────────────────────
-function buildDays(schedule, editMode) {
+// ── Build days ────────────────────────────────────────────────
+function buildDays(schedule, editMode, status) {
   var c = document.getElementById('days-container'); c.innerHTML = '';
   jobCounters = {};
+  var locked  = status === "submitted";
   schedule.forEach(function(dayData) {
     var day     = dayData.day;
     jobCounters[day] = 1;
@@ -278,63 +340,65 @@ function buildDays(schedule, editMode) {
           '<span class="day-date">' + (dayData.date || '') + '</span>' +
           (hasJobs ? '<span class="day-jobs-count">' + dayData.jobs.length + ' job' + (dayData.jobs.length > 1 ? 's' : '') + '</span>' : '') +
         '</div>' +
-        '<button class="nowork-btn" id="nwbtn-' + day + '" onclick="toggleNoWork(\'' + day + '\')">' + (noWork ? 'Undo' : 'No work') + '</button>' +
+        (!locked ? '<button class="nowork-btn" id="nwbtn-' + day + '" onclick="toggleNoWork(\'' + day + '\')">' + (noWork ? 'Undo' : 'No work') + '</button>' : '') +
       '</div>' +
       '<div class="day-body" id="dbody-' + day + '"' + (noWork ? ' style="display:none"' : '') + '>' +
-        (editMode ? '<div class="edit-banner"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editing previous submission</div>' : '') +
+        (locked ? '<div class="banner banner-green"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Submitted \u2014 read only</div>' : '') +
+        (editMode && !locked ? '<div class="banner banner-amber"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editing draft</div>' : '') +
         '<div id="djobs-' + day + '"></div>' +
-        '<button class="add-job-btn" onclick="addJobCard(\'' + day + '\', null, false)">' +
+        (!locked ? '<button class="add-job-btn" onclick="addJobCard(\'' + day + '\', null, false)">' +
           '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-          'Add unscheduled job' +
-        '</button>' +
+          'Add unscheduled job</button>' : '') +
       '</div>';
     c.appendChild(block);
     if (hasJobs) {
-      dayData.jobs.forEach(function(job) { addJobCard(day, job, true); });
+      dayData.jobs.forEach(function(job) { addJobCard(day, job, true, locked); });
     }
   });
 }
 
-// ── Add job card ─────────────────────────────────────────────
-function addJobCard(day, jobData, isScheduled) {
+// ── Add job card ──────────────────────────────────────────────
+function addJobCard(day, jobData, isScheduled, locked) {
   var c      = document.getElementById('djobs-' + day);
   var idx    = jobCounters[day]++;
   var jid    = day + '-' + idx;
   var uuid   = jobData ? (jobData.job_uuid    || '') : '';
   var num    = jobData ? (jobData.job_number  || '') : '';
   var addr   = jobData ? (jobData.job_address || jobData.contact_name || '') : '';
-  // Saved submission fields take priority over scheduled fields
-  var hasSaved = jobData && (jobData.start_time || jobData.finish_time || jobData.travel_minutes || jobData.break_minutes || jobData.notes);
-  var startT = jobData ? (jobData.start_time    || (!hasSaved ? jobData.scheduled_start : '') || '') : '';
-  var endT   = jobData ? (jobData.finish_time   || (!hasSaved ? jobData.scheduled_end   : '') || '') : '';
+  var hasSaved = jobData && (jobData.start_time || jobData.finish_time || jobData.notes ||
+                  (jobData.travel_minutes !== undefined && jobData.travel_minutes !== null && jobData.travel_minutes !== '') ||
+                  (jobData.break_minutes  !== undefined && jobData.break_minutes  !== null && jobData.break_minutes  !== ''));
+  var startT = jobData ? (jobData.start_time    || (!hasSaved ? (jobData.scheduled_start || '') : '')) : '';
+  var endT   = jobData ? (jobData.finish_time   || (!hasSaved ? (jobData.scheduled_end   || '') : '')) : '';
   var travel = jobData ? (jobData.travel_minutes !== undefined && jobData.travel_minutes !== null ? jobData.travel_minutes : '') : '';
   var brk    = jobData ? (jobData.break_minutes  !== undefined && jobData.break_minutes  !== null ? jobData.break_minutes  : '') : '';
   var notes  = jobData ? (jobData.notes || '') : '';
+  var ro     = locked ? ' readonly disabled' : '';
   var div    = document.createElement('div');
   div.className = 'job-card'; div.id = 'jcard-' + jid;
+
+  var inputsHtml = locked
+    ? '<div class="g2"><div><label>Start time</label><input type="time" id="jstart-' + jid + '" value="' + startT + '" readonly disabled/></div><div><label>Finish time</label><input type="time" id="jfinish-' + jid + '" value="' + endT + '" readonly disabled/></div></div>' +
+      '<div class="g2"><div><label>Travel (min)</label><input type="number" id="jtravel-' + jid + '" value="' + travel + '" readonly disabled/></div><div><label>Break (min)</label><input type="number" id="jbreak-' + jid + '" value="' + brk + '" readonly disabled/></div></div>' +
+      '<div><label>Job notes</label><textarea id="jnotes-' + jid + '" readonly disabled>' + notes + '</textarea></div>'
+    : '<div class="g2"><div><label>Start time</label><input type="time" id="jstart-' + jid + '" value="' + startT + '" onchange="onFieldChange()"/></div><div><label>Finish time</label><input type="time" id="jfinish-' + jid + '" value="' + endT + '" onchange="onFieldChange()"/></div></div>' +
+      '<div class="g2"><div><label>Travel (min)</label><input type="number" min="0" step="5" placeholder="0" id="jtravel-' + jid + '" value="' + travel + '" onchange="onFieldChange()"/></div><div><label>Break (min)</label><input type="number" min="0" step="5" placeholder="0" id="jbreak-' + jid + '" value="' + brk + '" onchange="onFieldChange()"/></div></div>' +
+      '<div><label>Job notes</label><textarea id="jnotes-' + jid + '" placeholder="Work completed, materials used, issues\u2026" oninput="onFieldChange()">' + notes + '</textarea></div>';
+
   div.innerHTML =
     '<div class="job-card-top">' +
       '<span class="job-pill' + (isScheduled ? ' scheduled' : '') + '">' +
         (isScheduled ? '\u26A1 ' : '') + 'Job ' + idx + (num ? ' \u00B7 ' + num : '') +
       '</span>' +
-      '<div class="job-card-actions">' +
-        '<button class="rm-btn" onclick="removeJob(\'' + jid + '\')">&times;</button>' +
-      '</div>' +
+      (!locked ? '<button class="rm-btn" onclick="removeJob(\'' + jid + '\')">&times;</button>' : '') +
     '</div>' +
     (addr ? '<div class="job-address"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + addr + '</div>' : '') +
     '<input type="hidden" id="juuid-' + jid + '" value="' + uuid + '"/>' +
-    (!isScheduled || !num
-      ? '<div class="g1"><label>Job number / search</label><div style="display:flex;gap:6px"><input type="text" id="jnum-' + jid + '" value="' + num + '" placeholder="Job number, client name or address\u2026" onchange="updateSummary()"/><button class="btn btn-outline-blue" style="white-space:nowrap;flex-shrink:0;font-size:12px;padding:0 10px" onclick="lookupJob(\'' + jid + '\')">Find</button></div><div id="jlookup-' + jid + '" style="font-size:12px;margin-top:4px"></div></div>'
+    (!isScheduled && !locked
+      ? '<div class="g1"><label>Job number / search</label><div style="display:flex;gap:6px"><input type="text" id="jnum-' + jid + '" value="' + num + '" placeholder="Number, client name or address\u2026" onchange="onFieldChange()"/><button class="btn btn-outline-blue" style="white-space:nowrap;flex-shrink:0;font-size:12px;padding:0 10px" onclick="lookupJob(\'' + jid + '\')">Find</button></div><div id="jlookup-' + jid + '" style="font-size:12px;margin-top:4px"></div></div>'
       : '<input type="hidden" id="jnum-' + jid + '" value="' + num + '"/>') +
-    '<div class="g2">' +
-      '<div><label>Start time</label><input type="time" id="jstart-'  + jid + '" value="' + startT + '" onchange="updateSummary()"/></div>' +
-      '<div><label>Finish time</label><input type="time" id="jfinish-' + jid + '" value="' + endT   + '" onchange="updateSummary()"/></div>' +
-    '</div>' +
-    '<div class="g2">' +
-      '<div><label>Travel (min)</label><input type="number" min="0" step="5" placeholder="0" id="jtravel-' + jid + '" value="' + travel + '" onchange="updateSummary()"/></div>' +
-      '<div><label>Break (min)</label><input type="number"  min="0" step="5" placeholder="0" id="jbreak-'  + jid + '" value="' + brk    + '" onchange="updateSummary()"/></div>' +
-    '</div>' +
-    '<div><label>Job notes</label><textarea id="jnotes-' + jid + '" placeholder="Work completed, materials used, issues\u2026">' + notes + '</textarea></div>';
+    inputsHtml;
+
   c.appendChild(div);
   updateSummary();
 }
@@ -348,10 +412,10 @@ function toggleNoWork(day) {
   } else {
     body.style.display = 'none'; btn.textContent = 'Undo'; block.classList.add('day-dimmed');
   }
-  updateSummary();
+  onFieldChange();
 }
 
-function removeJob(jid) { var el = document.getElementById('jcard-' + jid); if (el) el.remove(); updateSummary(); }
+function removeJob(jid) { var el = document.getElementById('jcard-' + jid); if (el) el.remove(); onFieldChange(); }
 
 function timeDiff(s, f) {
   if (!s || !f) return 0;
@@ -382,11 +446,16 @@ function updateSummary() {
   document.getElementById('s-break').innerHTML   = totBreak +'<span class="stat-unit"> min</span>';
 }
 
+// ── Auto-save on field change ─────────────────────────────────
+function onFieldChange() {
+  updateSummary();
+  clearTimeout(autoSaveTimer);
+  document.getElementById('autosave-indicator').textContent = 'Unsaved changes\u2026';
+  autoSaveTimer = setTimeout(function() { saveDraft(true); }, 3000);
+}
+
+// ── Build payload ─────────────────────────────────────────────
 function buildPayload() {
-  var staffSel   = document.getElementById('staff-select');
-  var staffUuid  = staffSel.value;
-  var staffName  = staffSel.options[staffSel.selectedIndex] ? staffSel.options[staffSel.selectedIndex].textContent : '';
-  var weekEnding = document.getElementById('week-ending').value;
   var days = currentSchedule.map(function(dayData) {
     var day  = dayData.day;
     var body = document.getElementById('dbody-' + day);
@@ -409,56 +478,94 @@ function buildPayload() {
     });
     return { day:day, date:dayData.date, no_work:false, jobs:jobs };
   });
-  return { staff_name:staffName, staff_uuid:staffUuid, week_ending:weekEnding,
-           submitted_at:new Date().toISOString(), is_edit:isEdit, days:days };
+  return { staff_name:currentStaffName, staff_uuid:currentStaffUuid,
+           week_ending:currentWeekEnding, submitted_at:new Date().toISOString(), days:days };
 }
 
-async function submitTimesheet() {
-  var staffUuid  = document.getElementById('staff-select').value;
-  var weekEnding = document.getElementById('week-ending').value;
-  var btn        = document.getElementById('submit-btn');
-  if (!staffUuid)              { setStatus('status-msg','Please select your name.','err'); return; }
-  if (!weekEnding)             { setStatus('status-msg','Please select a week ending date.','err'); return; }
-  if (!currentSchedule.length) { setStatus('status-msg','Please load your schedule first.','err'); return; }
-  var payload = buildPayload();
-  btn.disabled = true;
-  setStatus('status-msg', isEdit ? 'Updating ServiceM8\u2026 removing old entries first' : 'Submitting to ServiceM8\u2026', 'loading');
+// ── Save draft ────────────────────────────────────────────────
+async function saveDraft(auto) {
+  if (!currentStaffUuid || !currentWeekEnding) return;
+  if (currentStatus === 'submitted') return;
+  var payload  = buildPayload();
+  var encoded  = encodeURIComponent(JSON.stringify(payload));
+  var indicator = document.getElementById('autosave-indicator');
+  if (!auto) { indicator.textContent = 'Saving\u2026'; }
   try {
-    var result = await proxyPost(payload);
+    var res = await fetch(PROXY_URL + "?action=savedraft&data=" + encoded);
+    var result = await res.json();
     if (result.success) {
-      showSuccess(payload);
+      isEdit = true;
+      indicator.textContent = 'Draft saved \u2713 ' + new Date().toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit'});
+      indicator.style.color = 'var(--green)';
+      setTimeout(function() { indicator.style.color = ''; }, 3000);
     } else {
-      setStatus('status-msg','Some jobs could not be submitted: ' + (result.errors||[]).join(', '),'err');
+      indicator.textContent = 'Could not save draft';
+      indicator.style.color = 'var(--red)';
     }
   } catch(e) {
-    setStatus('status-msg','Could not reach the server. Check your internet and try again.','err');
+    indicator.textContent = 'Could not save draft';
+    indicator.style.color = 'var(--red)';
+  }
+}
+
+// ── Submit modal ──────────────────────────────────────────────
+function showSubmitModal() {
+  if (!currentStaffUuid) { setStatus('status-msg','Please load your schedule first.','err'); return; }
+  document.getElementById('submit-modal').style.display = 'flex';
+}
+function closeModal() { document.getElementById('submit-modal').style.display = 'none'; }
+
+async function confirmSubmit() {
+  closeModal();
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  setStatus('status-msg', 'Submitting to ServiceM8\u2026', 'loading');
+  var payload = buildPayload();
+  var encoded = encodeURIComponent(JSON.stringify(payload));
+  try {
+    var res    = await fetch(PROXY_URL + "?action=submit&data=" + encoded);
+    var result = await res.json();
+    if (result.success) {
+      currentStatus = 'submitted';
+      showSuccess(payload);
+    } else {
+      setStatus('status-msg', result.message || 'Submission failed. Please try again.', 'err');
+    }
+  } catch(e) {
+    setStatus('status-msg', 'Could not reach the server. Check your internet.', 'err');
   }
   btn.disabled = false;
 }
 
-function showSuccess(payload) {
-  var section = document.getElementById('submit-section');
-  var allJobs = [];
-  payload.days.forEach(function(d){ if(d.jobs) d.jobs.forEach(function(j){ allJobs.push({day:d.day,job:j}); }); });
-  var totalH  = allJobs.reduce(function(s,j){ return s+(j.job.net_hours||0); },0);
-  var dateStr = new Date(payload.week_ending+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'});
-  section.innerHTML =
-    '<div class="result-card">' +
-      '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#057A55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
-      '<div class="result-title">' + (payload.is_edit ? 'Timesheet updated in ServiceM8 \u2713' : 'Submitted to ServiceM8 \u2713') + '</div>' +
-      '<div class="result-sub">' + payload.staff_name + ' \u2014 week ending ' + dateStr + '</div>' +
-      '<div class="result-rows">' +
-        '<div style="font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px">Jobs submitted</div>' +
-        allJobs.map(function(j){ return '<div class="result-row"><span>'+j.day+' \u2014 '+(j.job.job_number?'Job '+j.job.job_number:'Unscheduled')+'</span><span>'+(j.job.net_hours||0).toFixed(2)+' hrs</span></div>'; }).join('') +
-        '<div class="result-row result-total"><span>Total</span><span>'+totalH.toFixed(2)+' hrs</span></div>' +
-      '</div>' +
-    '</div>' +
-    '<button class="btn" style="width:100%;justify-content:center;margin-top:4px" onclick="location.reload()">' +
-      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.1"/></svg>' +
-      'Start new timesheet' +
-    '</button>';
+// ── Admin unlock modal ────────────────────────────────────────
+function showUnlockModal() { document.getElementById('unlock-modal').style.display = 'flex'; }
+function closeUnlockModal() {
+  document.getElementById('unlock-modal').style.display = 'none';
+  document.getElementById('admin-pin').value = '';
+  setStatus('unlock-status', '', '');
 }
 
+async function confirmUnlock() {
+  var adminPin = document.getElementById('admin-pin').value.trim();
+  if (!adminPin) { setStatus('unlock-status','Please enter the admin PIN.','err'); return; }
+  setStatus('unlock-status','Verifying\u2026','loading');
+  try {
+    var res    = await fetch(PROXY_URL + "?action=adminunlock&pin=" + encodeURIComponent(adminPin) +
+                             "&staff_uuid=" + encodeURIComponent(currentStaffUuid) +
+                             "&week_ending=" + encodeURIComponent(currentWeekEnding));
+    var result = await res.json();
+    if (result.success) {
+      closeUnlockModal();
+      location.reload();
+    } else {
+      setStatus('unlock-status', result.message || 'Invalid admin PIN.', 'err');
+    }
+  } catch(e) {
+    setStatus('unlock-status','Could not connect. Try again.','err');
+  }
+}
+
+// ── Job lookup ────────────────────────────────────────────────
 async function lookupJob(jid) {
   var input  = document.getElementById('jnum-' + jid);
   var status = document.getElementById('jlookup-' + jid);
@@ -470,18 +577,16 @@ async function lookupJob(jid) {
     var data = await proxyGet("lookupjob", { job_number: query });
     if (data.success && data.jobs && data.jobs.length > 0) {
       if (data.jobs.length === 1) {
-        // Single match — auto select
         var j = data.jobs[0];
         document.getElementById('juuid-' + jid).value = j.job_uuid;
         input.value = j.job_number;
         status.textContent = '\u2713 ' + j.job_number + (j.job_address ? ' \u2014 ' + j.job_address : '') + (j.contact ? ' (' + j.contact + ')' : '');
         status.style.color = 'var(--green)';
-        updateSummary();
+        onFieldChange();
       } else {
-        // Multiple matches — show dropdown
         status.innerHTML = '';
         var dd = document.createElement('div');
-        dd.style.cssText = 'border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);margin-top:4px;max-height:180px;overflow-y:auto;';
+        dd.style.cssText = 'border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);margin-top:4px;max-height:200px;overflow-y:auto;z-index:50;position:relative';
         data.jobs.forEach(function(j) {
           var item = document.createElement('div');
           item.style.cssText = 'padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;';
@@ -491,9 +596,10 @@ async function lookupJob(jid) {
           item.addEventListener('click', function() {
             document.getElementById('juuid-' + jid).value = j.job_uuid;
             input.value = j.job_number;
+            status.innerHTML = '';
             status.textContent = '\u2713 ' + j.job_number + (j.job_address ? ' \u2014 ' + j.job_address : '');
             status.style.color = 'var(--green)';
-            updateSummary();
+            onFieldChange();
           });
           item.addEventListener('mouseover', function() { item.style.background = 'var(--s2)'; });
           item.addEventListener('mouseout',  function() { item.style.background = ''; });
@@ -501,21 +607,39 @@ async function lookupJob(jid) {
         });
         status.appendChild(dd);
       }
-    } else if (data.success && data.job_uuid) {
-      // Legacy single result format
-      document.getElementById('juuid-' + jid).value = data.job_uuid;
-      input.value = data.job_number;
-      status.textContent = '\u2713 ' + data.job_number + (data.job_address ? ' \u2014 ' + data.job_address : '');
-      status.style.color = 'var(--green)';
-      updateSummary();
     } else {
-      status.textContent = 'No jobs found \u2014 try a different number, name or address.';
+      status.textContent = 'No jobs found \u2014 try a different search.';
       status.style.color = 'var(--red)';
     }
   } catch(e) {
-    status.textContent = 'Could not look up job.';
+    status.textContent = 'Could not look up job. Check your connection.';
     status.style.color = 'var(--red)';
   }
+}
+
+// ── Success screen ────────────────────────────────────────────
+function showSuccess(payload) {
+  var section = document.getElementById('submit-section');
+  var allJobs = [];
+  payload.days.forEach(function(d){ if(d.jobs) d.jobs.forEach(function(j){ allJobs.push({day:d.day,job:j}); }); });
+  var totalH  = allJobs.reduce(function(s,j){ return s+(j.job.net_hours||0); },0);
+  var dateStr = new Date(payload.week_ending+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'});
+  section.innerHTML =
+    '<div class="result-card">' +
+      '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#057A55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+      '<div class="result-title" style="color:var(--gtext)">Submitted to ServiceM8 \u2713</div>' +
+      '<div class="result-sub" style="color:var(--green)">' + payload.staff_name + ' \u2014 week ending ' + dateStr + '</div>' +
+      '<div class="result-rows">' +
+        '<div style="font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px">Jobs submitted</div>' +
+        allJobs.map(function(j){ return '<div class="result-row" style="color:var(--gtext)"><span>'+j.day+' \u2014 '+(j.job.job_number?'Job '+j.job.job_number:'Unscheduled')+'</span><span>'+(j.job.net_hours||0).toFixed(2)+' hrs</span></div>'; }).join('') +
+        '<div class="result-row result-total" style="color:var(--gtext)"><span>Total</span><span>'+totalH.toFixed(2)+' hrs</span></div>' +
+      '</div>' +
+      '<p style="font-size:11px;color:var(--green);margin-top:12px">Your timesheet is now locked. Contact your admin if changes are needed.</p>' +
+    '</div>' +
+    '<button class="btn" style="width:100%;justify-content:center;margin-top:4px" onclick="location.reload()">' +
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.1"/></svg>' +
+      'Start new timesheet' +
+    '</button>';
 }
 </script>
 </body>
